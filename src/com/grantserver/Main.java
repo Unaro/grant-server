@@ -8,6 +8,8 @@ import java.util.concurrent.Executors;
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.dao.ParticipantDAO;
 import com.grantserver.dao.impl.ParticipantDAOImpl;
+import com.grantserver.service.ParticipantService;
+import com.grantserver.service.impl.ParticipantServiceImpl;
 
 public class Main {
     
@@ -50,12 +52,16 @@ public class Main {
     private static void initializeContext() {
         ServiceRegistry registry = ServiceRegistry.getInstance();
         
-        // 1. Создаем DAO
+        // 1. Создаем и регистрируем DAO (уже было)
         ParticipantDAO participantDAO = new ParticipantDAOImpl();
-        
-        // 2. Регистрируем в контейнере
         registry.register(ParticipantDAO.class, participantDAO);
         
-        System.out.println("Контекст инициализирован: DAO зарегистрированы.");
+        // 2. Создаем и регистрируем Service
+        // Важно: создаем сервис ПОСЛЕ того, как зарегистрировали DAO, 
+        // так как сервис может искать DAO в конструкторе.
+        ParticipantService participantService = new ParticipantServiceImpl();
+        registry.register(ParticipantService.class, participantService);
+        
+        System.out.println("Контекст инициализирован: DAO и Services готовы.");
     }
 }
