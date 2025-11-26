@@ -6,6 +6,8 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
 import com.grantserver.common.config.ServiceRegistry;
+import com.grantserver.dao.ParticipantDAO;
+import com.grantserver.dao.impl.ParticipantDAOImpl;
 
 public class Main {
     
@@ -47,6 +49,13 @@ public class Main {
 
     private static void initializeContext() {
         ServiceRegistry registry = ServiceRegistry.getInstance();
-        // TODO: Инициализация DAO и ServiceImpl
+        
+        // 1. Создаем DAO
+        ParticipantDAO participantDAO = new ParticipantDAOImpl();
+        
+        // 2. Регистрируем в контейнере
+        registry.register(ParticipantDAO.class, participantDAO);
+        
+        System.out.println("Контекст инициализирован: DAO зарегистрированы.");
     }
 }
