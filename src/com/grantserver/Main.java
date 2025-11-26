@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
+import com.grantserver.api.handlers.GrantApplicationsHandler;
 import com.grantserver.api.handlers.ParticipantsHandler;
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.dao.GrantApplicationDAO;
@@ -42,9 +43,12 @@ public class Main {
             exchange.getResponseBody().write(response.getBytes());
             exchange.close();
         });
-
+        
+        // Participants API 
         server.createContext("/api/participants", new ParticipantsHandler());
-
+        
+        // Applications API
+        server.createContext("/api/applications", new GrantApplicationsHandler());
         // 4. Настройка пула потоков
         // Создаем pool потоков для обработки запросов (похоже на Tomcat)
         server.setExecutor(Executors.newFixedThreadPool(10)); 
