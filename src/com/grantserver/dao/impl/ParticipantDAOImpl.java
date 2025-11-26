@@ -18,7 +18,6 @@ public class ParticipantDAOImpl implements ParticipantDAO {
     @Override
     public Participant save(Participant participant) {
         if (participant.id == null) {
-            // Новый участник - генерируем ID
             participant.id = idGenerator.incrementAndGet();
         }
         storage.put(participant.id, participant);

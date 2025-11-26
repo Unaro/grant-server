@@ -58,9 +58,7 @@ public class Main {
         registry.register(ParticipantDAO.class, participantDAO);
         
         // 2. Создаем и регистрируем Service
-        // Важно: создаем сервис ПОСЛЕ того, как зарегистрировали DAO, 
-        // так как сервис может искать DAO в конструкторе.
-        ParticipantService participantService = new ParticipantServiceImpl();
+         ParticipantService participantService = new ParticipantServiceImpl();
         registry.register(ParticipantService.class, participantService);
         
         System.out.println("Контекст инициализирован: DAO и Services готовы.");
