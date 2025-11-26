@@ -5,7 +5,7 @@ public class Participant {
     public String firmName;
     public Manager manager;
     public String login;
-    public String password; // Храним в БД, но не отдаем в API
+    public String password;
 
     public Participant() {}
 }

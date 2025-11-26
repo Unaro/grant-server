@@ -11,7 +11,6 @@ public class ParticipantDTO {
 
     public ParticipantDTO() {}
 
-    // Удобный конструктор для конвертации из Entity
     public ParticipantDTO(Participant participant) {
         this.id = participant.id;
         this.firmName = participant.firmName;

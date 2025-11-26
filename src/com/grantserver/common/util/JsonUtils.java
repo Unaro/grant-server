@@ -11,18 +11,17 @@ public class JsonUtils {
      * Сериализация объекта в JSON строку.
      * Поддерживает: String, Number, Boolean, List (простой), вложенные объекты.
      */
+    @SuppressWarnings("CallToPrintStackTrace")
     public static String toJson(Object object) {
         if (object == null) return "null";
         
         Class<?> clazz = object.getClass();
         
-        // Обработка примитивов и строк
         if (clazz.equals(String.class)) return "\"" + object + "\"";
         if (Number.class.isAssignableFrom(clazz) || clazz.equals(Boolean.class)) return object.toString();
         
         // Обработка списков
-        if (object instanceof List<?>) {
-            List<?> list = (List<?>) object;
+        if (object instanceof List<?> list) {
             StringBuilder sb = new StringBuilder("[");
             for (int i = 0; i < list.size(); i++) {
                 sb.append(toJson(list.get(i)));
@@ -141,13 +140,13 @@ public class JsonUtils {
             return value.substring(1, value.length() - 1); // Убираем кавычки
         }
         if (type == int.class || type == Integer.class) {
-            return Integer.parseInt(value);
+            return Integer.valueOf(value);
         }
         if (type == long.class || type == Long.class) {
-            return Long.parseLong(value);
+            return Long.valueOf(value);
         }
         if (type == boolean.class || type == Boolean.class) {
-            return Boolean.parseBoolean(value);
+            return Boolean.valueOf(value);
         }
         // Рекурсивно для вложенных объектов (кроме списков пока)
         if (!type.isPrimitive() && !type.equals(String.class) && !List.class.isAssignableFrom(type)) {
