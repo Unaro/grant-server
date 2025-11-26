@@ -2,7 +2,9 @@ package com.grantserver.api.handlers;
 
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.common.util.JsonUtils;
+import com.grantserver.dto.request.AuthRequestDTO;
 import com.grantserver.dto.request.ParticipantRegisterDTO;
+import com.grantserver.dto.response.AuthResponseDTO;
 import com.grantserver.dto.response.ParticipantDTO;
 import com.grantserver.dto.response.ServerResponseDTO;
 import com.grantserver.service.ParticipantService;
@@ -27,45 +29,70 @@ public class ParticipantsHandler implements HttpHandler {
         String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
 
-        // Маршрутизация (Routing)
         try {
+            // Роутинг
             if ("POST".equals(method) && path.endsWith("/register")) {
                 handleRegister(exchange);
+            } else if ("POST".equals(method) && path.endsWith("/login")) {
+                handleLogin(exchange);
             } else {
-                // Если метод или путь не найдены
                 sendResponse(exchange, 404, "Endpoint not found");
             }
         } catch (Exception e) {
             // Глобальная обработка ошибок
-            e.printStackTrace(); // Полезно видеть в консоли
+            e.printStackTrace();
             sendResponse(exchange, 400, e.getMessage());
         }
     }
 
     private void handleRegister(HttpExchange exchange) throws IOException {
-        // 1. Читаем тело запроса
         String body = readRequestBody(exchange.getRequestBody());
         
-        // 2. Парсим JSON
+        // Защита от пустого тела
+        if (body == null || body.trim().isEmpty()) {
+            sendResponse(exchange, 400, "Request body is empty");
+            return;
+        }
+
         ParticipantRegisterDTO dto = JsonUtils.fromJson(body, ParticipantRegisterDTO.class);
         
-        // 3. Вызываем бизнес-логику
-        ParticipantDTO created = participantService.register(dto);
+        // Защита от некорректного JSON
+        if (dto == null) {
+            sendResponse(exchange, 400, "Invalid JSON format");
+            return;
+        }
         
-        // 4. Отправляем успешный ответ (200 OK)
+        ParticipantDTO created = participantService.register(dto);
         sendResponse(exchange, 200, created);
     }
 
-    // --- Утилитные методы (можно потом вынести в BaseHandler) ---
+    private void handleLogin(HttpExchange exchange) throws IOException {
+        String body = readRequestBody(exchange.getRequestBody());
+        
+        if (body == null || body.trim().isEmpty()) {
+            sendResponse(exchange, 400, "Request body is empty");
+            return;
+        }
+
+        AuthRequestDTO dto = JsonUtils.fromJson(body, AuthRequestDTO.class);
+        
+        if (dto == null) {
+            sendResponse(exchange, 400, "Invalid JSON format");
+            return;
+        }
+        
+        AuthResponseDTO response = participantService.login(dto);
+        sendResponse(exchange, 200, response);
+    }
+    // --- Утилиты ---
 
     private void sendResponse(HttpExchange exchange, int statusCode, Object data) throws IOException {
-        // Оборачиваем в ServerResponseDTO согласно спецификации
         ServerResponseDTO responseDTO = new ServerResponseDTO(statusCode, data);
         String jsonResponse = JsonUtils.toJson(responseDTO);
         
         byte[] bytes = jsonResponse.getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
-        exchange.sendResponseHeaders(200, bytes.length); // HTTP статус всегда 200, код ошибки внутри JSON
+        exchange.sendResponseHeaders(200, bytes.length);
         
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(bytes);

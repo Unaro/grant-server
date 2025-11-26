@@ -20,14 +20,12 @@ public class Main {
     public static void main(String[] args) throws IOException {
         System.out.println("Инициализация GrantServer...");
 
-        // 1. Инициализация зависимостей (Bootstrap)
-        // Здесь мы будем создавать DAO и Сервисы через Factory и класть в Registry
-        // initializeContext(); 
+        // 1. СНАЧАЛА регистрируем все сервисы
+        initializeContext(); 
 
-        // 2. Запуск HTTP сервера
-        // Используем встроенный HttpServer (JDK 6+)
+        // 2. ПОТОМ создаем сервер
         HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
-
+        
         // 3. Создание контекстов (роутинг)
         // server.createContext("/api/participants", new ParticipantsHandler());
         // server.createContext("/api/experts", new ExpertsHandler());
