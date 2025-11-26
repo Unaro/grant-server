@@ -7,9 +7,13 @@ import java.util.concurrent.Executors;
 
 import com.grantserver.api.handlers.ParticipantsHandler;
 import com.grantserver.common.config.ServiceRegistry;
+import com.grantserver.dao.GrantApplicationDAO;
 import com.grantserver.dao.ParticipantDAO;
+import com.grantserver.dao.impl.GrantApplicationDAOImpl;
 import com.grantserver.dao.impl.ParticipantDAOImpl;
+import com.grantserver.service.GrantApplicationService;
 import com.grantserver.service.ParticipantService;
+import com.grantserver.service.impl.GrantApplicationServiceImpl;
 import com.grantserver.service.impl.ParticipantServiceImpl;
 
 public class Main {
@@ -53,13 +57,21 @@ public class Main {
     private static void initializeContext() {
         ServiceRegistry registry = ServiceRegistry.getInstance();
         
-        // 1. Создаем и регистрируем DAO (уже было)
+        // --- Participants Module ---
         ParticipantDAO participantDAO = new ParticipantDAOImpl();
         registry.register(ParticipantDAO.class, participantDAO);
         
-        // 2. Создаем и регистрируем Service
-         ParticipantService participantService = new ParticipantServiceImpl();
+        ParticipantService participantService = new ParticipantServiceImpl();
         registry.register(ParticipantService.class, participantService);
+
+        // --- Grant Applications Module (НОВОЕ) ---
+        // 1. DAO
+        GrantApplicationDAO grantApplicationDAO = new GrantApplicationDAOImpl();
+        registry.register(GrantApplicationDAO.class, grantApplicationDAO);
+
+        // 2. Service
+        GrantApplicationService grantApplicationService = new GrantApplicationServiceImpl();
+        registry.register(GrantApplicationService.class, grantApplicationService);
         
         System.out.println("Контекст инициализирован: DAO и Services готовы.");
     }
