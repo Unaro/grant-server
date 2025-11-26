@@ -8,12 +8,16 @@ import java.util.concurrent.Executors;
 import com.grantserver.api.handlers.GrantApplicationsHandler;
 import com.grantserver.api.handlers.ParticipantsHandler;
 import com.grantserver.common.config.ServiceRegistry;
+import com.grantserver.dao.ExpertDAO;
 import com.grantserver.dao.GrantApplicationDAO;
 import com.grantserver.dao.ParticipantDAO;
+import com.grantserver.dao.impl.ExpertDAOImpl;
 import com.grantserver.dao.impl.GrantApplicationDAOImpl;
 import com.grantserver.dao.impl.ParticipantDAOImpl;
+import com.grantserver.service.ExpertService;
 import com.grantserver.service.GrantApplicationService;
 import com.grantserver.service.ParticipantService;
+import com.grantserver.service.impl.ExpertServiceImpl;
 import com.grantserver.service.impl.GrantApplicationServiceImpl;
 import com.grantserver.service.impl.ParticipantServiceImpl;
 
@@ -68,7 +72,17 @@ public class Main {
         ParticipantService participantService = new ParticipantServiceImpl();
         registry.register(ParticipantService.class, participantService);
 
-        // --- Grant Applications Module (НОВОЕ) ---
+
+        // --- Experts Module ---
+        // 1. DAO
+        ExpertDAO expertDAO = new ExpertDAOImpl();
+        registry.register(ExpertDAO.class, expertDAO);
+
+        // 2. Service
+        ExpertService expertService = new ExpertServiceImpl();
+        registry.register(ExpertService.class, expertService);
+
+        // --- Grant Applications Module ---
         // 1. DAO
         GrantApplicationDAO grantApplicationDAO = new GrantApplicationDAOImpl();
         registry.register(GrantApplicationDAO.class, grantApplicationDAO);
