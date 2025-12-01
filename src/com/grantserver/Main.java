@@ -21,10 +21,12 @@ import com.grantserver.dao.impl.ParticipantDAOImpl;
 import com.grantserver.service.EvaluationService;
 import com.grantserver.service.ExpertService;
 import com.grantserver.service.GrantApplicationService;
+import com.grantserver.service.GrantFundService;
 import com.grantserver.service.ParticipantService;
 import com.grantserver.service.impl.EvaluationServiceImpl;
 import com.grantserver.service.impl.ExpertServiceImpl;
 import com.grantserver.service.impl.GrantApplicationServiceImpl;
+import com.grantserver.service.impl.GrantFundServiceImpl;
 import com.grantserver.service.impl.ParticipantServiceImpl;
 
 public class Main {
@@ -114,6 +116,10 @@ public class Main {
         // 2. Service
         EvaluationService evaluationService = new EvaluationServiceImpl();
         registry.register(EvaluationService.class, evaluationService);
+
+        // --- Grant Fund Module ---
+        GrantFundService grantFundService = new GrantFundServiceImpl();
+        registry.register(GrantFundService.class, grantFundService);
 
         // 2. Service
         GrantApplicationService grantApplicationService = new GrantApplicationServiceImpl();
