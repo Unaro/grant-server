@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
+import com.grantserver.api.handlers.EvaluationsHandler;
 import com.grantserver.api.handlers.ExpertsHandler;
 import com.grantserver.api.handlers.GrantApplicationsHandler;
 import com.grantserver.api.handlers.ParticipantsHandler;
@@ -66,7 +67,11 @@ public class Main {
         
         // Experts API
         server.createContext("/api/experts", new ExpertsHandler());
-            
+        
+        // Evaluations API
+        server.createContext("/api/evaluations", new EvaluationsHandler());
+        
+        
         // 4. Настройка пула потоков
         // Создаем pool потоков для обработки запросов (похоже на Tomcat)
         server.setExecutor(Executors.newFixedThreadPool(10)); 
