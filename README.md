@@ -1,18 +1,45 @@
-## Getting Started
+# GrantServer (Pure Java API)
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+REST API сервер для системы проведения грантовых конкурсов.
+**Ключевая особенность:** Проект реализован **полностью на стандартных библиотеках Java (JDK)** без использования сторонних фреймворков (Spring, Hibernate, Jackson, Maven/Gradle dependencies).
 
-## Folder Structure
+## 🚀 Функциональность
 
-The workspace contains two folders by default, where:
+* **Участники:** Регистрация компаний, авторизация (токены), подача заявок на гранты.
+* **Эксперты:** Регистрация, указание компетенций, оценка заявок.
+* **Заявки:** Подача, просмотр, статусная модель.
+* **Оценка:** Эксперты выставляют баллы заявкам.
+* **Распределение фонда:** Умный алгоритм (Strategy Pattern), который ранжирует заявки по баллам и цене, автоматически распределяя бюджет.
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+## 🛠 Технологический стек
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+* **Язык:** Java 11+ (Core/Standard Library).
+* **Web Server:** `com.sun.net.httpserver.HttpServer` (встроенный в JDK).
+* **JSON Parsing:** Кастомный `JsonUtils` на основе Reflection API.
+* **DI Container:** Кастомный `ServiceRegistry` (Singleton).
+* **Database:** In-Memory хранилище (`ConcurrentHashMap`).
 
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+## 🏗 Архитектура
 
-## Dependency Management
+Проект построен по принципам **Clean Architecture**:
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+1.  **API Layer (`handlers`):** Принимает HTTP запросы, использует `JsonUtils` для десериализации, вызывает сервисы.
+2.  **Service Layer (`service`):** Бизнес-логика, валидация, транзакции.
+3.  **DAO Layer (`dao`):** Доступ к данным (In-Memory реализация).
+
+Использованные паттерны: **DAO, DTO, Singleton, Factory, Strategy, Command**.
+
+## 📦 Структура проекта
+
+```text
+src/com/grantserver/
+├── api/handlers/      # Контроллеры (HttpHandler)
+├── service/           # Бизнес-логика
+├── dao/               # Доступ к данным
+├── model/             # Сущности БД
+├── dto/               # Объекты передачи данных
+├── common/
+│   ├── config/        # ServiceRegistry (DI)
+│   └── util/          # JsonUtils (Сериализатор)
+└── Main.java          # Точка входа
+```
