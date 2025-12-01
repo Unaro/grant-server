@@ -10,7 +10,6 @@ public class DefaultRankingStrategy implements RankingStrategy {
         }
         
         // 2. Если баллы равны, сравниваем по сумме (чем меньше просит, тем лучше -> asc)
-        // Это позволяет удовлетворить больше дешевых заявок при равенстве баллов
         return Integer.compare(a.application.requestedSum, b.application.requestedSum);
     }
 }

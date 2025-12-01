@@ -16,7 +16,7 @@ public class ParticipantServiceImpl implements ParticipantService {
     private final ParticipantDAO participantDAO;
 
     public ParticipantServiceImpl() {
-        // Получаем зависимость через наш Registry
+        // Получаем зависимость через Registry
         this.participantDAO = ServiceRegistry.getInstance().get(ParticipantDAO.class);
     }
 

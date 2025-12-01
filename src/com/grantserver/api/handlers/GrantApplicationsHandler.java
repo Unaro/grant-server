@@ -36,8 +36,7 @@ public class GrantApplicationsHandler implements HttpHandler {
             } else {
                 sendResponse(exchange, 404, "Endpoint not found");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
             sendResponse(exchange, 400, "Error: " + e.getMessage());
         }
     }
@@ -83,7 +82,7 @@ public class GrantApplicationsHandler implements HttpHandler {
         List<String> userIdHeaders = exchange.getRequestHeaders().get("X-User-Id");
         if (userIdHeaders != null && !userIdHeaders.isEmpty()) {
             try {
-                return Long.parseLong(userIdHeaders.get(0));
+                return Long.valueOf(userIdHeaders.get(0));
             } catch (NumberFormatException e) {
                 return null;
             }

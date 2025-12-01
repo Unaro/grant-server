@@ -63,7 +63,7 @@ public class Main {
             }
         });
 
-        // Подключаем все Handler'ы
+        // Подключаем Handler'ы
         server.createContext("/api/participants", new ParticipantsHandler());
         server.createContext("/api/applications", new GrantApplicationsHandler());
         server.createContext("/api/experts", new ExpertsHandler());
@@ -106,7 +106,6 @@ public class Main {
         EvaluationDAO evaluationDAO = new EvaluationDAOImpl();
         registry.register(EvaluationDAO.class, evaluationDAO);
 
-        // Важно: EvaluationService зависит от DAO экспертов и заявок, они должны быть выше
         EvaluationService evaluationService = new EvaluationServiceImpl();
         registry.register(EvaluationService.class, evaluationService);
 

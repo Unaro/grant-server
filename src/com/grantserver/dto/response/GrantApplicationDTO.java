@@ -10,7 +10,7 @@ public class GrantApplicationDTO {
     public List<String> fields;
     public Integer requestedSum;
     public Long ownerId;
-    public String status; // String проще для сериализации
+    public String status;
 
     public GrantApplicationDTO() {}
 

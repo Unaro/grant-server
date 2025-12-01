@@ -2,6 +2,7 @@ package com.grantserver.common.util;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,8 +19,7 @@ public class JsonUtils {
         if (clazz.equals(String.class)) return "\"" + object + "\"";
         if (Number.class.isAssignableFrom(clazz) || clazz.equals(Boolean.class)) return object.toString();
         
-        if (object instanceof List<?>) {
-            List<?> list = (List<?>) object;
+        if (object instanceof List<?> list) {
             StringBuilder sb = new StringBuilder("[");
             for (int i = 0; i < list.size(); i++) {
                 sb.append(toJson(list.get(i)));
@@ -81,7 +81,7 @@ public class JsonUtils {
                 }
             }
             return instance;
-        } catch (Exception e) {
+        } catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             throw new RuntimeException("Ошибка парсинга JSON для класса " + clazz.getSimpleName(), e);
         }
     }
@@ -125,19 +125,19 @@ public class JsonUtils {
         }
         // Целые числа
         if (type == int.class || type == Integer.class) {
-            return Integer.parseInt(value);
+            return Integer.valueOf(value);
         }
         // Long
         if (type == long.class || type == Long.class) {
-            return Long.parseLong(value);
+            return Long.valueOf(value);
         }
         // === ДОБАВЛЕНО: Дробные числа (Double) ===
         if (type == double.class || type == Double.class) {
-            return Double.parseDouble(value);
+            return Double.valueOf(value);
         }
         // Boolean
         if (type == boolean.class || type == Boolean.class) {
-            return Boolean.parseBoolean(value);
+            return Boolean.valueOf(value);
         }
         
         // Рекурсия для объектов

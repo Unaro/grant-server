@@ -12,7 +12,6 @@ public class ParticipantDAOImpl implements ParticipantDAO {
     
     // Имитация таблицы в памяти
     private final Map<Long, Participant> storage = new ConcurrentHashMap<>();
-    // Генератор ID (аналог SEQUENCE или AUTO_INCREMENT)
     private final AtomicLong idGenerator = new AtomicLong(0);
 
     @Override
@@ -31,8 +30,6 @@ public class ParticipantDAOImpl implements ParticipantDAO {
 
     @Override
     public Participant findByLogin(String login) {
-        // В реальной БД это было бы "SELECT * FROM participants WHERE login = ?"
-        // Здесь перебираем мапу (для in-memory это быстро)
         return storage.values().stream()
                 .filter(p -> p.login.equals(login))
                 .findFirst()

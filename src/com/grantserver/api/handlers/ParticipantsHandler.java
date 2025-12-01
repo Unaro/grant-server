@@ -38,9 +38,7 @@ public class ParticipantsHandler implements HttpHandler {
             } else {
                 sendResponse(exchange, 404, "Endpoint not found");
             }
-        } catch (Exception e) {
-            // Глобальная обработка ошибок
-            e.printStackTrace();
+        } catch (IOException e) {
             sendResponse(exchange, 400, e.getMessage());
         }
     }

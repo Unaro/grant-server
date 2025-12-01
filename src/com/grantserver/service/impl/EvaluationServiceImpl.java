@@ -52,7 +52,7 @@ public class EvaluationServiceImpl implements EvaluationService {
             throw new RuntimeException("Evaluation not found");
         }
         
-        // Обновляем поля (обычно только оценку, но можно и привязки, если нужно)
+        // Обновляем поля (оценку)
         existing.score = dto.score;
  
         Evaluation saved = evaluationDAO.save(existing);

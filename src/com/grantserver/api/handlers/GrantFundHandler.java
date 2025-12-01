@@ -32,8 +32,7 @@ public class GrantFundHandler implements HttpHandler {
             } else {
                 sendResponse(exchange, 404, "Endpoint not found or method not supported");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
             sendResponse(exchange, 400, "Error: " + e.getMessage());
         }
     }
@@ -51,7 +50,6 @@ public class GrantFundHandler implements HttpHandler {
             return;
         }
 
-        // Запуск бизнес-логики расчета
         GrantResultDTO result = grantFundService.calculate(dto);
         
         sendResponse(exchange, 200, result);

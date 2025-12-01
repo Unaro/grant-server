@@ -68,10 +68,8 @@ public class GrantFundServiceImpl implements GrantFundService {
                 // Денег хватает - выдаем грант
                 currentFund -= requested;
                 winners.add(new GrantResultDTO.WinnerDTO(sa.application, sa.averageScore, requested));
-                
-                // (Опционально) Можно менять статус заявки в БД на APPROVED
             }
-            // Если денег не хватает, заявка пропускается (или можно реализовать частичное финансирование)
+            // Если денег не хватает, заявка пропускается
         }
 
         return new GrantResultDTO(winners, currentFund);

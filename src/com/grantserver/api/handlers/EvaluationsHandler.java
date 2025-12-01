@@ -45,8 +45,7 @@ public class EvaluationsHandler implements HttpHandler {
             else {
                 sendResponse(exchange, 404, "Endpoint not found");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
             sendResponse(exchange, 400, "Error: " + e.getMessage());
         }
     }
@@ -87,7 +86,7 @@ public class EvaluationsHandler implements HttpHandler {
         try {
             // Берем всё, что после последнего слеша
             String idPart = path.substring(path.lastIndexOf('/') + 1);
-            return Long.parseLong(idPart);
+            return Long.valueOf(idPart);
         } catch (NumberFormatException e) {
             throw new RuntimeException("Invalid ID in path: " + path);
         }

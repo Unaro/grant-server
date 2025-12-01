@@ -38,8 +38,7 @@ public class ExpertsHandler implements HttpHandler {
             } else {
                 sendResponse(exchange, 404, "Endpoint not found");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
             sendResponse(exchange, 400, "Error: " + e.getMessage());
         }
     }
