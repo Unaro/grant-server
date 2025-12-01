@@ -9,15 +9,19 @@ import com.grantserver.api.handlers.ExpertsHandler;
 import com.grantserver.api.handlers.GrantApplicationsHandler;
 import com.grantserver.api.handlers.ParticipantsHandler;
 import com.grantserver.common.config.ServiceRegistry;
+import com.grantserver.dao.EvaluationDAO;
 import com.grantserver.dao.ExpertDAO;
 import com.grantserver.dao.GrantApplicationDAO;
 import com.grantserver.dao.ParticipantDAO;
+import com.grantserver.dao.impl.EvaluationDAOImpl;
 import com.grantserver.dao.impl.ExpertDAOImpl;
 import com.grantserver.dao.impl.GrantApplicationDAOImpl;
 import com.grantserver.dao.impl.ParticipantDAOImpl;
+import com.grantserver.service.EvaluationService;
 import com.grantserver.service.ExpertService;
 import com.grantserver.service.GrantApplicationService;
 import com.grantserver.service.ParticipantService;
+import com.grantserver.service.impl.EvaluationServiceImpl;
 import com.grantserver.service.impl.ExpertServiceImpl;
 import com.grantserver.service.impl.GrantApplicationServiceImpl;
 import com.grantserver.service.impl.ParticipantServiceImpl;
@@ -42,11 +46,16 @@ public class Main {
         
         // Базовый эндпоинт для проверки жизни
         server.createContext("/api/health", exchange -> {
+            try (exchange;) {
             String response = "{\"status\": \"OK\", \"server\": \"GrantServer v1.0\"}";
             exchange.getResponseHeaders().add("Content-Type", "application/json");
             exchange.sendResponseHeaders(200, response.getBytes().length);
             exchange.getResponseBody().write(response.getBytes());
-            exchange.close();
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+            
+
         });
         
         // Participants API 
@@ -91,6 +100,15 @@ public class Main {
         // 1. DAO
         GrantApplicationDAO grantApplicationDAO = new GrantApplicationDAOImpl();
         registry.register(GrantApplicationDAO.class, grantApplicationDAO);
+
+        // --- Evaluations Module ---
+        // 1. DAO
+        EvaluationDAO evaluationDAO = new EvaluationDAOImpl();
+        registry.register(EvaluationDAO.class, evaluationDAO);
+
+        // 2. Service
+        EvaluationService evaluationService = new EvaluationServiceImpl();
+        registry.register(EvaluationService.class, evaluationService);
 
         // 2. Service
         GrantApplicationService grantApplicationService = new GrantApplicationServiceImpl();
