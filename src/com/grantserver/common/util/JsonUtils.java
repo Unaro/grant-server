@@ -9,9 +9,7 @@ public class JsonUtils {
 
     /**
      * Сериализация объекта в JSON строку.
-     * Поддерживает: String, Number, Boolean, List (простой), вложенные объекты.
      */
-    @SuppressWarnings("CallToPrintStackTrace")
     public static String toJson(Object object) {
         if (object == null) return "null";
         
@@ -20,8 +18,8 @@ public class JsonUtils {
         if (clazz.equals(String.class)) return "\"" + object + "\"";
         if (Number.class.isAssignableFrom(clazz) || clazz.equals(Boolean.class)) return object.toString();
         
-        // Обработка списков
-        if (object instanceof List<?> list) {
+        if (object instanceof List<?>) {
+            List<?> list = (List<?>) object;
             StringBuilder sb = new StringBuilder("[");
             for (int i = 0; i < list.size(); i++) {
                 sb.append(toJson(list.get(i)));
@@ -31,7 +29,6 @@ public class JsonUtils {
             return sb.toString();
         }
 
-        // Обработка объектов (DTO)
         StringBuilder json = new StringBuilder("{");
         Field[] fields = clazz.getDeclaredFields();
 
@@ -41,7 +38,6 @@ public class JsonUtils {
                 field.setAccessible(true);
                 Object value = field.get(object);
                 
-                // Пропускаем null поля, чтобы не засорять JSON
                 if (value != null) {
                     if (!first) json.append(",");
                     json.append("\"").append(field.getName()).append("\":");
@@ -59,17 +55,12 @@ public class JsonUtils {
 
     /**
      * Десериализация JSON строки в объект.
-     * Ограничения: 
-     * 1. Очень простой парсер, ищет поля по именам.
-     * 2. Не поддерживает сложные вложенные структуры (массивы внутри массивов).
-     * 3. Рассчитан на корректный JSON от клиента.
      */
     public static <T> T fromJson(String json, Class<T> clazz) {
         if (json == null || json.isEmpty()) return null;
         
-        // Убираем лишние пробелы и переносы строк для упрощения парсинга
-        String cleanJson = json.replaceAll("\\s+(?=([^\"]*\"[^\"]*\")*[^\"]*$)", ""); // удаляет пробелы вне кавычек
-        cleanJson = cleanJson.substring(1, cleanJson.length() - 1); // Убираем внешние {}
+        String cleanJson = json.replaceAll("\\s+(?=([^\"]*\"[^\"]*\")*[^\"]*$)", ""); 
+        cleanJson = cleanJson.substring(1, cleanJson.length() - 1); 
 
         try {
             Constructor<T> constructor = clazz.getDeclaredConstructor();
@@ -82,7 +73,6 @@ public class JsonUtils {
                 
                 int index = cleanJson.indexOf(fieldName);
                 if (index != -1) {
-                    // Начало значения
                     int valueStart = index + fieldName.length();
                     String valueStr = extractValue(cleanJson, valueStart);
                     
@@ -96,17 +86,14 @@ public class JsonUtils {
         }
     }
 
-    // Вспомогательный метод для извлечения подстроки значения
     private static String extractValue(String json, int start) {
         char firstChar = json.charAt(start);
         
-        // Если это строка
         if (firstChar == '"') {
             int end = json.indexOf("\"", start + 1);
-            return json.substring(start, end + 1); // возвращаем с кавычками
+            return json.substring(start, end + 1);
         }
         
-        // Если это массив
         if (firstChar == '[') {
             int bracketCount = 0;
             for (int i = start; i < json.length(); i++) {
@@ -116,7 +103,6 @@ public class JsonUtils {
             }
         }
 
-        // Если это объект (nested object)
         if (firstChar == '{') {
             int braceCount = 0;
             for (int i = start; i < json.length(); i++) {
@@ -126,7 +112,6 @@ public class JsonUtils {
             }
         }
         
-        // Если это примитив (число, boolean)
         int end = start;
         while (end < json.length() && json.charAt(end) != ',' && json.charAt(end) != '}') {
             end++;
@@ -134,28 +119,35 @@ public class JsonUtils {
         return json.substring(start, end);
     }
 
-    // Преобразование строки в нужный тип
     private static Object parseValue(String value, Class<?> type) {
         if (value.startsWith("\"")) {
-            return value.substring(1, value.length() - 1); // Убираем кавычки
+            return value.substring(1, value.length() - 1); 
         }
+        // Целые числа
         if (type == int.class || type == Integer.class) {
-            return Integer.valueOf(value);
+            return Integer.parseInt(value);
         }
+        // Long
         if (type == long.class || type == Long.class) {
-            return Long.valueOf(value);
+            return Long.parseLong(value);
         }
+        // === ДОБАВЛЕНО: Дробные числа (Double) ===
+        if (type == double.class || type == Double.class) {
+            return Double.parseDouble(value);
+        }
+        // Boolean
         if (type == boolean.class || type == Boolean.class) {
-            return Boolean.valueOf(value);
+            return Boolean.parseBoolean(value);
         }
-        // Рекурсивно для вложенных объектов (кроме списков пока)
-        if (!type.isPrimitive() && !type.equals(String.class) && !List.class.isAssignableFrom(type)) {
+        
+        // Рекурсия для объектов
+        if (!type.isPrimitive() && !type.equals(String.class) && !List.class.isAssignableFrom(type) && !Number.class.isAssignableFrom(type)) {
             return fromJson(value, type);
         }
-        // TODO: Добавить парсинг List<String>, если понадобится для ExpertRegisterDTO
+        
+        // Списки строк
         if (List.class.isAssignableFrom(type)) {
-             // Простая реализация для List<String>
-             String content = value.substring(1, value.length() - 1); // убрать []
+             String content = value.substring(1, value.length() - 1);
              String[] parts = content.split(",");
              List<String> list = new ArrayList<>();
              for (String part : parts) {
