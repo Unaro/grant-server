@@ -1,5 +1,6 @@
 package com.grantserver.service.impl;
 
+import com.grantserver.common.auth.SessionManager;
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.dao.ExpertDAO;
 import com.grantserver.dto.request.AuthRequestDTO;
@@ -50,6 +51,10 @@ public class ExpertServiceImpl implements ExpertService {
 
         // Генерируем токен
         String token = UUID.randomUUID().toString();
+
+        // Сохраняем сессию
+        SessionManager.getInstance().createExpertSession(token, expert.id);
+
         return new AuthResponseDTO(token);
     }
 

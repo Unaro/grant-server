@@ -1,5 +1,6 @@
 package com.grantserver.api.handlers;
 
+import com.grantserver.common.auth.SessionManager;
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.common.util.JsonUtils;
 import com.grantserver.dto.request.EvaluationCreateDTO;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class EvaluationsHandler implements HttpHandler {
 
@@ -51,7 +53,16 @@ public class EvaluationsHandler implements HttpHandler {
     }
 
     private void handleCreate(HttpExchange exchange) throws IOException {
+        
+        // 1. Проверка прав эксперта
+        Long expertId = getExpertIdFromToken(exchange);
+        if (expertId == null) {
+            sendResponse(exchange, 401, "Unauthorized: Invalid or missing expert token");
+            return;
+        }
+        
         String body = readRequestBody(exchange.getRequestBody());
+
         if (body == null || body.trim().isEmpty()) {
             sendResponse(exchange, 400, "Request body is empty");
             return;
@@ -63,24 +74,53 @@ public class EvaluationsHandler implements HttpHandler {
             return;
         }
 
+        dto.expertId = expertId;
+
         EvaluationDTO created = evaluationService.addEvaluation(dto);
         sendResponse(exchange, 200, created);
     }
 
     private void handleUpdate(HttpExchange exchange, Long id) throws IOException {
+        
+        // 1. Проверка прав эксперта
+        Long expertId = getExpertIdFromToken(exchange);
+        if (expertId == null) {
+            sendResponse(exchange, 401, "Unauthorized");
+            return;
+        }
+        
         String body = readRequestBody(exchange.getRequestBody());
         EvaluationCreateDTO dto = JsonUtils.fromJson(body, EvaluationCreateDTO.class);
         
+        dto.expertId = expertId;
+
         EvaluationDTO updated = evaluationService.updateEvaluation(id, dto);
         sendResponse(exchange, 200, updated);
     }
 
     private void handleDelete(HttpExchange exchange, Long id) throws IOException {
+        // 1. Проверка на авторизацию
+        if (getExpertIdFromToken(exchange) == null) {
+            sendResponse(exchange, 401, "Unauthorized");
+            return;
+        }
+       
         evaluationService.deleteEvaluation(id);
         sendResponse(exchange, 200, "Evaluation deleted successfully");
     }
 
     // --- Утилиты ---
+
+    private Long getExpertIdFromToken(HttpExchange exchange) {
+        List<String> authHeader = exchange.getRequestHeaders().get("Authorization");
+        if (authHeader == null || authHeader.isEmpty()) return null;
+
+        String token = authHeader.get(0);
+        if (token.startsWith("Bearer ")) token = token.substring(7);
+
+        return SessionManager.getInstance().getExpertId(token);
+    }
+
 
     private Long extractIdFromPath(String path) {
         try {

@@ -1,5 +1,6 @@
 package com.grantserver.service.impl;
 
+import com.grantserver.common.auth.SessionManager;
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.dao.ParticipantDAO;
 import com.grantserver.dto.request.AuthRequestDTO;
@@ -54,6 +55,9 @@ public class ParticipantServiceImpl implements ParticipantService {
         // 3. Генерируем токен (UUID)
         String token = UUID.randomUUID().toString();
         
+        // 4. Сохраняем сессию
+        SessionManager.getInstance().createParticipantSession(token, participant.id);
+
         return new AuthResponseDTO(token);
     }
 }

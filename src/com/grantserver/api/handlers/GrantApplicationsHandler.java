@@ -1,5 +1,6 @@
 package com.grantserver.api.handlers;
 
+import com.grantserver.common.auth.SessionManager;
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.common.util.JsonUtils;
 import com.grantserver.dto.request.GrantApplicationCreateDTO;
@@ -42,8 +43,8 @@ public class GrantApplicationsHandler implements HttpHandler {
     }
 
     private void handleCreate(HttpExchange exchange) throws IOException {
-        // 1. Получаем ID пользователя из заголовка (имитация проверки токена)
-        Long ownerId = getUserIdFromHeaders(exchange);
+        // 1. Авторизация через токен
+        Long ownerId = getUserIdFromToken(exchange);
         if (ownerId == null) {
             sendResponse(exchange, 401, "Unauthorized: Missing X-User-Id header");
             return;
@@ -70,24 +71,29 @@ public class GrantApplicationsHandler implements HttpHandler {
     }
 
     private void handleList(HttpExchange exchange) throws IOException {
-        // Простой GET без фильтров (фильтры добавим позже при необходимости)
         List<GrantApplicationDTO> list = grantApplicationService.getAll();
         sendResponse(exchange, 200, list);
     }
 
     // --- Утилиты ---
 
-    private Long getUserIdFromHeaders(HttpExchange exchange) {
-        // Временное решение для тестов: читаем ID напрямую из заголовка
-        List<String> userIdHeaders = exchange.getRequestHeaders().get("X-User-Id");
-        if (userIdHeaders != null && !userIdHeaders.isEmpty()) {
-            try {
-                return Long.valueOf(userIdHeaders.get(0));
-            } catch (NumberFormatException e) {
-                return null;
-            }
+    private Long getUserIdFromToken(HttpExchange exchange) {
+        // 1. Ищем заголовок Authorization
+        List<String> authHeader = exchange.getRequestHeaders().get("Authorization");
+        
+        if (authHeader == null || authHeader.isEmpty()) {
+            return null;
         }
-        return null;
+
+        String token = authHeader.get(0); // Ожидаем формат "Bearer <token>" или просто "<token>"
+        
+        // Очистка от префикса Bearer
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
+        // 2. Проверяем токен через SessionManager
+        return SessionManager.getInstance().getParticipantId(token);
     }
 
     private void sendResponse(HttpExchange exchange, int statusCode, Object data) throws IOException {
