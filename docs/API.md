@@ -4,53 +4,60 @@
 
 ***
 
+## Аутентификация
+
+Большинство эндпоинтов (кроме регистрации и входа) требуют наличия заголовка авторизации.
+Сервер использует механизм **Bearer Token**.
+
+**Заголовок:**
+`Authorization: Bearer <your_token_uuid>`
+
+Если заголовок отсутствует или токен невалиден, сервер вернет ошибку `401 Unauthorized`.
+
+***
+
 ## Эндпоинты
 
 ### 1. Регистрация и авторизация
 
-| HTTP | URL | Описание | Тело запроса | Пример ответа |
-| :-- | :-- | :-- | :-- | :-- |
-| POST | /api/participants/register | Регистрация фирмы | ParticipantRegisterDTO | ServerResponseDTO |
-| POST | /api/experts/register | Регистрация эксперта | ExpertRegisterDTO | ServerResponseDTO |
-| POST | /api/participants/login | Вход участника | AuthRequestDTO | AuthResponseDTO |
-| POST | /api/experts/login | Вход эксперта | AuthRequestDTO | AuthResponseDTO |
-| POST | /api/participants/logout | Выход участника | — | ServerResponseDTO |
-| POST | /api/experts/logout | Выход эксперта | — | ServerResponseDTO |
-| DELETE | /api/participants/{id} | Удалить участника | — | ServerResponseDTO |
-| DELETE | /api/experts/{id} | Удалить эксперта | — | ServerResponseDTO |
+| HTTP | URL | Описание | Заголовки | Тело запроса | Пример ответа |
+| :-- | :-- | :-- | :-- | :-- | :-- |
+| POST | /api/participants/register | Регистрация фирмы | — | **ParticipantRegisterDTO** | ServerResponseDTO |
+| POST | /api/experts/register | Регистрация эксперта | — | **ExpertRegisterDTO** | ServerResponseDTO |
+| POST | /api/participants/login | Вход участника | — | **AuthRequestDTO** | AuthResponseDTO |
+| POST | /api/experts/login | Вход эксперта | — | **AuthRequestDTO** | AuthResponseDTO |
 
 
 ***
 
 ### 2. Работа с заявками
 
-| HTTP | URL | Описание | Тело запроса | Пример ответа |
-| :-- | :-- | :-- | :-- | :-- |
-| POST | /api/applications | Добавить заявку на грант | GrantApplicationDTO | ServerResponseDTO |
-| GET | /api/applications | Получить список заявок | GrantApplicationFilterDTO (query params/JSON) | ServerResponseDTO (массив заявок) |
-| DELETE | /api/applications/{id} | Отменить заявку | — | ServerResponseDTO |
+| HTTP | URL | Описание | Заголовки | Тело запроса | Пример ответа |
+| :-- | :-- | :-- | :-- | :-- | :-- |
+| POST | /api/applications | Добавить заявку | `Authorization` | **GrantApplicationCreateDTO** | ServerResponseDTO |
+| GET | /api/applications | Получить список | `Authorization` | — | ServerResponseDTO (массив) |
 
+*Примечание: Поле `ownerId` берется автоматически из токена участника.*
 
 ***
 
 ### 3. Оценка заявок экспертами
 
-| HTTP | URL | Описание | Тело запроса | Пример ответа |
-| :-- | :-- | :-- | :-- | :-- |
-| POST | /api/evaluations | Поставить оценку | EvaluationDTO | ServerResponseDTO |
-| PUT | /api/evaluations/{id} | Изменить оценку | EvaluationDTO | ServerResponseDTO |
-| DELETE | /api/evaluations/{id} | Удалить оценку | — | ServerResponseDTO |
-| GET | /api/applications/by-fields | Заявки по направлениям | { "fields": ["математика"] } | ServerResponseDTO (массив заявок) |
-| GET | /api/applications/by-expert/{expertId} | Заявки, оценённые экспертом | — | ServerResponseDTO (массив заявок) |
+| HTTP | URL | Описание | Заголовки | Тело запроса | Пример ответа |
+| :-- | :-- | :-- | :-- | :-- | :-- |
+| POST | /api/evaluations | Поставить оценку | `Authorization` | **EvaluationCreateDTO** | ServerResponseDTO |
+| PUT | /api/evaluations/{id} | Изменить оценку | `Authorization` | **EvaluationCreateDTO** | ServerResponseDTO |
+| DELETE | /api/evaluations/{id} | Удалить оценку | `Authorization` | — | ServerResponseDTO |
 
+*Примечание: Поле `expertId` берется автоматически из токена эксперта.*
 
 ***
 
 ### 4. Итоговый расчёт и распределение грантов
 
-| HTTP | URL | Описание | Тело запроса | Пример ответа |
-| :-- | :-- | :-- | :-- | :-- |
-| POST | /api/grants/compute | Подвести итоги конкурса | GrantFundRequestDTO | ServerResponseDTO (результаты распределения) |
+| HTTP | URL | Описание | Заголовки | Тело запроса | Пример ответа |
+| :-- | :-- | :-- | :-- | :-- | :-- |
+| POST | /api/grants/compute | Подвести итоги | `Authorization` | **GrantFundRequestDTO** | ServerResponseDTO (результаты) |
 
 
 ***
@@ -71,7 +78,6 @@
 }
 ```
 
-
 ### ExpertRegisterDTO
 
 ```json
@@ -84,7 +90,6 @@
 }
 ```
 
-
 ### AuthRequestDTO
 
 ```json
@@ -94,15 +99,13 @@
 }
 ```
 
-
 ### AuthResponseDTO
 
 ```json
 {
-  "token": "jwt-token-value"
+  "token": "d290f1ee-6c54-4b01-90e6-d701748f0851"
 }
 ```
-
 
 ### GrantApplicationDTO
 
@@ -114,21 +117,9 @@
   "fields": ["математика", "информатика"],
   "requestedSum": 500000,
   "ownerId": 1,
-  "status": "ACTIVE" // ACTIVE, CANCELLED
-}
-```
-
-
-### GrantApplicationFilterDTO
-
-```json
-{
-  "ownerId": 1,
-  "fields": ["информатика"],
   "status": "ACTIVE"
 }
 ```
-
 
 ### EvaluationDTO
 
@@ -141,146 +132,31 @@
 }
 ```
 
-
 ### GrantFundRequestDTO
 
-```json
+```json 
 {
   "fund": 1500000,
-  "threshold": 3
+  "threshold": 3.5
 }
 ```
 
-
 ### ServerResponseDTO
 
-**Успех:**
+Успех:
 
-```json
+```json 
 {
   "responseCode": 200,
   "responseData": { /* специфичный DTO, массив, информация */ }
 }
 ```
 
-**Ошибка:**
+Ошибка:
 
 ```json
 {
   "responseCode": 400,
-  "responseData": "Invalid request data"
+  "responseData": "Error message description"
 }
 ```
-
-
-***
-
-## Примеры
-
-### Регистрация участника
-
-**POST /api/participants/register**
-_Тело запроса:_
-
-```json
-{
-  "firmName": "ООО Идея",
-  "manager": {
-    "firstName": "Иван",
-    "lastName": "Петров"
-  },
-  "login": "firm_idea",
-  "password": "secure_password"
-}
-```
-
-_Ответ:_
-
-```json
-{
-  "responseCode": 200,
-  "responseData": {
-    "id": 1,
-    "firmName": "ООО Идея",
-    "manager": {
-      "firstName": "Иван",
-      "lastName": "Петров"
-    },
-    "login": "firm_idea"
-  }
-}
-```
-
-
-***
-
-### Добавление заявки
-
-**POST /api/applications**
-_Тело запроса:_
-
-```json
-{
-  "title": "Нейронная сеть для анализа данных",
-  "description": "ML и аналитика",
-  "fields": ["математика", "информатика"],
-  "requestedSum": 700000
-}
-```
-
-_Ответ:_
-
-```json
-{
-  "responseCode": 200,
-  "responseData": {
-    "id": 101,
-    "title": "Нейронная сеть для анализа данных",
-    "fields": ["математика", "информатика"],
-    "requestedSum": 700000,
-    "ownerId": 1,
-    "status": "ACTIVE"
-  }
-}
-```
-
-
-***
-
-### Оценка заявки
-
-**POST /api/evaluations**
-_Тело запроса:_
-
-```json
-{
-  "applicationId": 101,
-  "expertId": 2,
-  "score": 4
-}
-```
-
-_Ответ:_
-
-```json
-{
-  "responseCode": 200,
-  "responseData": {
-    "id": 201,
-    "applicationId": 101,
-    "expertId": 2,
-    "score": 4
-  }
-}
-```
-
-
-***
-
-## Примечания
-
-- Все логины уникальны, двойная регистрация недопустима
-- Удаление участника или эксперта полностью уничтожает связанные заявки/оценки
-- Оценки можно изменять или удалять, заявки после создания изменению не подлежат (можно только отменить)
-- Итоговое подведение результатов автоматизируется отдельной сервисной функцией
-- Каждому эндпоинту сопоставлены соответствующие тесты (JUnit), что отражено в структуре проекта
