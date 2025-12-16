@@ -1,5 +1,10 @@
 package com.grantserver;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
+
 import com.grantserver.api.handlers.EvaluationsHandler;
 import com.grantserver.api.handlers.ExpertsHandler;
 import com.grantserver.api.handlers.GrantApplicationsHandler;
@@ -25,17 +30,13 @@ import com.grantserver.service.impl.GrantApplicationServiceImpl;
 import com.grantserver.service.impl.GrantFundServiceImpl;
 import com.grantserver.service.impl.ParticipantServiceImpl;
 import com.sun.net.httpserver.HttpServer;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.util.concurrent.Executors;
 
 public class Main {
     
     private static final int PORT = 8080; 
 
     public static void main(String[] args) throws IOException {
-        HttpServer server = startServer();
+        startServer();
         System.out.println("Сервер запущен на порту: " + PORT);
     }
 
