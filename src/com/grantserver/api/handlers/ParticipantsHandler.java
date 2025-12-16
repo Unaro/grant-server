@@ -10,7 +10,6 @@ import com.grantserver.dto.response.ServerResponseDTO;
 import com.grantserver.service.ParticipantService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -56,7 +55,7 @@ public class ParticipantsHandler implements HttpHandler {
         
         // Защита от некорректного JSON
         if (dto == null) {
-            sendResponse(exchange, 400, "Invalid JSON format");
+             
             return;
         }
         

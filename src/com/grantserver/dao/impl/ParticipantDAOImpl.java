@@ -1,36 +1,42 @@
 package com.grantserver.dao.impl;
 
+import com.grantserver.common.db.Database;
 import com.grantserver.dao.ParticipantDAO;
 import com.grantserver.model.Participant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class ParticipantDAOImpl implements ParticipantDAO {
     
-    // Имитация таблицы в памяти
-    private final Map<Long, Participant> storage = new ConcurrentHashMap<>();
-    private final AtomicLong idGenerator = new AtomicLong(0);
+    // Ссылка на "таблицу" в базе данных
+    private final Map<Long, Participant> table;
+    private final Database db;
+
+    public ParticipantDAOImpl() {
+        this.db = Database.getInstance();
+        this.table = db.getParticipantsTable();
+    }
 
     @Override
     public Participant save(Participant participant) {
         if (participant.id == null) {
-            participant.id = idGenerator.incrementAndGet();
+            // Запрашиваем новый ID у базы (аналог sequence)
+            participant.id = db.nextParticipantId();
         }
-        storage.put(participant.id, participant);
+        table.put(participant.id, participant);
         return participant;
     }
 
     @Override
     public Participant findById(Long id) {
-        return storage.get(id);
+        return table.get(id);
     }
 
     @Override
     public Participant findByLogin(String login) {
-        return storage.values().stream()
+        // SELECT * FROM participants WHERE login = ?
+        return table.values().stream()
                 .filter(p -> p.login.equals(login))
                 .findFirst()
                 .orElse(null);
@@ -38,11 +44,11 @@ public class ParticipantDAOImpl implements ParticipantDAO {
 
     @Override
     public List<Participant> findAll() {
-        return new ArrayList<>(storage.values());
+        return new ArrayList<>(table.values());
     }
 
     @Override
     public boolean delete(Long id) {
-        return storage.remove(id) != null;
+        return table.remove(id) != null;
     }
 }
