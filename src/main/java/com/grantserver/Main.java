@@ -37,11 +37,11 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         startServer();
-        System.out.println("Сервер запущен на порту: " + PORT);
+        System.out.println("Server start on port: " + PORT);
     }
 
     public static HttpServer startServer() throws IOException {
-        System.out.println("Инициализация GrantServer...");
+        System.out.println("Starting GrantServer...");
         initializeContext(); 
 
         HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
@@ -103,6 +103,6 @@ public class Main {
         GrantFundService grantFundService = new GrantFundServiceImpl();
         registry.register(GrantFundService.class, grantFundService);
         
-        System.out.println("Контекст инициализирован: Все DAO и Services готовы.");
+        System.out.println("initialize Context: Services and DAO");
     }
 }

@@ -32,15 +32,13 @@ public class GrantServerTest {
     @BeforeAll
     public static void setUp() throws Exception {
         server = Main.startServer();
-        // Даем серверу время на старт
-        Thread.sleep(500);
     }
 
     @AfterAll
     public static void tearDown() {
         if (server != null) {
             server.stop(0);
-            System.out.println("Сервер остановлен.");
+            System.out.println("Server stop.");
         }
     }
 
@@ -62,7 +60,7 @@ public class GrantServerTest {
     @DisplayName("2. Успешная регистрация участника")
     public void testRegisterParticipant() throws Exception {
         String json = "{\"firmName\":\"JUnitCorp\",\"manager\":{\"firstName\":\"J\",\"lastName\":\"Unit\"},\"login\":\"junit_user\",\"password\":\"123\"}";
-        HttpResponse<String> response = sendPost("/participants/register", json, null);
+        HttpResponse<String> response = sendPost("/participants/register", json);
         assertEquals(200, response.statusCode());
         assertTrue(response.body().contains("\"id\":1"));
     }
@@ -73,7 +71,7 @@ public class GrantServerTest {
     public void testRegisterDuplicate() throws Exception {
         // Пытаемся зарегистрировать того же юзера
         String json = "{\"firmName\":\"Clone\",\"manager\":{\"firstName\":\"C\",\"lastName\":\"Lone\"},\"login\":\"junit_user\",\"password\":\"123\"}";
-        HttpResponse<String> response = sendPost("/participants/register", json, null);
+        HttpResponse<String> response = sendPost("/participants/register", json);
         
         // Ожидаем ошибку (400 Bad Request или 409 Conflict в зависимости от вашей реализации)
         assertTrue(response.statusCode() >= 400, "Should return error code for duplicate login");
@@ -84,7 +82,7 @@ public class GrantServerTest {
     @DisplayName("4. Успешный вход участника")
     public void testLoginParticipant() throws Exception {
         String json = "{\"login\":\"junit_user\",\"password\":\"123\"}";
-        HttpResponse<String> response = sendPost("/participants/login", json, null);
+        HttpResponse<String> response = sendPost("/participants/login", json);
         assertEquals(200, response.statusCode());
         participantToken = extractToken(response.body());
         assertNotNull(participantToken);
@@ -95,7 +93,7 @@ public class GrantServerTest {
     @DisplayName("5. ОШИБКА: Вход с неверным паролем")
     public void testLoginInvalidPassword() throws Exception {
         String json = "{\"login\":\"junit_user\",\"password\":\"WRONG_PASS\"}";
-        HttpResponse<String> response = sendPost("/participants/login", json, null);
+        HttpResponse<String> response = sendPost("/participants/login", json);
         // Ожидаем 400 или 401
         assertTrue(response.statusCode() >= 400);
     }
@@ -108,7 +106,7 @@ public class GrantServerTest {
     public void testCreateApplicationUnauthorized() throws Exception {
         String json = "{\"title\":\"Hacker App\",\"description\":\"...\",\"fields\":[\"IT\"],\"requestedSum\":1000}";
         // Отправляем БЕЗ токена
-        HttpResponse<String> response = sendPost("/applications", json, null);
+        HttpResponse<String> response = sendPost("/applications", json);
         assertEquals(401, response.statusCode());
     }
 
@@ -138,10 +136,10 @@ public class GrantServerTest {
     @DisplayName("9. Регистрация и вход Эксперта")
     public void testExpertFlow() throws Exception {
         String regJson = "{\"firstName\":\"Exp\",\"lastName\":\"Test\",\"fields\":[\"IT\"],\"login\":\"exp_junit\",\"password\":\"123\"}";
-        sendPost("/experts/register", regJson, null);
+        sendPost("/experts/register", regJson);
 
         String authJson = "{\"login\":\"exp_junit\",\"password\":\"123\"}";
-        HttpResponse<String> response = sendPost("/experts/login", authJson, null);
+        HttpResponse<String> response = sendPost("/experts/login", authJson);
         assertEquals(200, response.statusCode());
         expertToken = extractToken(response.body());
     }
@@ -194,10 +192,10 @@ public class GrantServerTest {
 
         // Регистрируем второго участника
         String user2 = "{\"firmName\":\"LoserCorp\",\"manager\":{\"firstName\":\"L\",\"lastName\":\"Oser\"},\"login\":\"loser_user\",\"password\":\"123\"}";
-        sendPost("/participants/register", user2, null);
+        sendPost("/participants/register", user2);
         // Логинимся
         String login2 = "{\"login\":\"loser_user\",\"password\":\"123\"}";
-        HttpResponse<String> respLogin = sendPost("/participants/login", login2, null);
+        HttpResponse<String> respLogin = sendPost("/participants/login", login2);
         String token2 = extractToken(respLogin.body());
 
         // Создаем Заявку 2 (Дорогая и плохая)
@@ -251,6 +249,16 @@ public class GrantServerTest {
         
         return client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
     }
+
+    private HttpResponse<String> sendPost(String path, String json) throws Exception {
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + path))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json));
+        
+        return client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+    }
+
 
     // НОВЫЙ МЕТОД: PUT
     private HttpResponse<String> sendPut(String path, String json, String token) throws Exception {

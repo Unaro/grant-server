@@ -20,12 +20,10 @@ public class ExpertServiceImpl implements ExpertService {
 
     @Override
     public ExpertDTO register(ExpertRegisterDTO dto) {
-        // 1. Проверка уникальности логина
         if (expertDAO.findByLogin(dto.login) != null) {
             throw new RuntimeException("Login '" + dto.login + "' is already taken.");
         }
 
-        // 2. Маппинг
         Expert expert = new Expert();
         expert.firstName = dto.firstName;
         expert.lastName = dto.lastName;
@@ -33,7 +31,6 @@ public class ExpertServiceImpl implements ExpertService {
         expert.login = dto.login;
         expert.password = dto.password;
 
-        // 3. Сохранение
         Expert saved = expertDAO.save(expert);
 
         return new ExpertDTO(saved);
@@ -47,7 +44,6 @@ public class ExpertServiceImpl implements ExpertService {
             throw new RuntimeException("Invalid login or password");
         }
 
-        // Генерируем токен
         String token = SessionManager.getInstance().createSession(expert.id);
 
         return new AuthResponseDTO(token);

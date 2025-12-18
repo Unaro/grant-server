@@ -33,7 +33,7 @@ public class GrantApplicationServiceImpl implements GrantApplicationService {
         app.status = GrantApplicationStatus.ACTIVE;
 
         Participant participant = participantDAO.findById(ownerId);
-        if (participant == null) throw new IllegalArgumentException("Участник не найден");
+        if (participant == null) throw new IllegalArgumentException("Participant not found");
 
         app.id = grantApplicationDAO.generateId(); 
 

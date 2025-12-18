@@ -3,10 +3,8 @@ package com.grantserver.service.algorithm;
 import com.grantserver.model.GrantApplication;
 
 public interface RankingStrategy {
-    // Метод сравнивает две заявки для сортировки
     int compare(ScoredApplication a, ScoredApplication b);
     
-    // Вспомогательный класс-обертка
     class ScoredApplication {
         public GrantApplication application;
         public Double averageScore;

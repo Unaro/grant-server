@@ -48,7 +48,7 @@ public class EvaluationServiceImpl implements EvaluationService {
     public EvaluationDTO updateEvaluation(Long id, EvaluationCreateDTO dto) {
         Evaluation existing = evaluationDAO.findById(id);
         if (existing == null) {
-            throw new RuntimeException("Оценка не найдена");
+            throw new RuntimeException("Evaluation not found");
         }
         
         existing.score = dto.score;
@@ -59,7 +59,7 @@ public class EvaluationServiceImpl implements EvaluationService {
     @Override
     public void deleteEvaluation(Long id) {
         if (!evaluationDAO.delete(id)) {
-            throw new RuntimeException("Оценка не найдена для удаления");
+            throw new RuntimeException("Evaluation not found for delete");
         }
     }
 

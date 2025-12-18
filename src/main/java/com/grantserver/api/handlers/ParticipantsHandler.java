@@ -35,9 +35,7 @@ public class ParticipantsHandler implements HttpHandler {
                 sendResponse(exchange, 404, "Not Found");
             }
         } catch (Exception e) {
-            // ГЛОБАЛЬНЫЙ ОТЛОВ ОШИБОК
-            // Если сервис кинул ошибку - отправляем 400 Bad Request
-            e.printStackTrace(); // Полезно видеть в консоли
+            e.printStackTrace();
             sendResponse(exchange, 400, e.getMessage());
         }
     }
@@ -46,7 +44,6 @@ public class ParticipantsHandler implements HttpHandler {
         String body = new String(exchange.getRequestBody().readAllBytes());
         ParticipantRegisterDTO dto = JsonUtils.fromJson(body, ParticipantRegisterDTO.class);
 
-        // Сервис может бросить исключение, если логин занят. Оно поймается в handle()
         var result = participantService.register(dto);
         
         String responseJson = JsonUtils.toJson(new ServerResponseDTO(200, result));
@@ -57,7 +54,6 @@ public class ParticipantsHandler implements HttpHandler {
         String body = new String(exchange.getRequestBody().readAllBytes());
         AuthRequestDTO dto = JsonUtils.fromJson(body, AuthRequestDTO.class);
 
-        // Сервис может бросить исключение, если пароль неверный
         AuthResponseDTO tokenDto = participantService.login(dto);
 
         String responseJson = JsonUtils.toJson(new ServerResponseDTO(200, tokenDto));

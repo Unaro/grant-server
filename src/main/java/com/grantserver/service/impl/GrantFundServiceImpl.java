@@ -26,7 +26,6 @@ public class GrantFundServiceImpl implements GrantFundService {
         ServiceRegistry registry = ServiceRegistry.getInstance();
         this.applicationDAO = registry.get(GrantApplicationDAO.class);
         this.evaluationDAO = registry.get(EvaluationDAO.class);
-        // Стратегию можно тоже вынести в Registry, но пока создадим тут
         this.rankingStrategy = new DefaultRankingStrategy();
     }
 
