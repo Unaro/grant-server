@@ -6,14 +6,14 @@ public class EvaluationDTO {
     public Long id;
     public Long applicationId;
     public Long expertId;
-    public Integer score;
+    public Double score;
 
     public EvaluationDTO() {}
 
     public EvaluationDTO(Evaluation evaluation) {
         this.id = evaluation.id;
-        this.applicationId = evaluation.applicationId;
-        this.expertId = evaluation.expertId;
+        this.applicationId = evaluation.application.id;
+        this.expertId = evaluation.id;
         this.score = evaluation.score;
     }
 }

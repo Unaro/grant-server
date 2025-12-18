@@ -10,8 +10,6 @@ import com.grantserver.dto.response.ParticipantDTO;
 import com.grantserver.model.Participant;
 import com.grantserver.service.ParticipantService;
 
-import java.util.UUID;
-
 public class ParticipantServiceImpl implements ParticipantService {
 
     private final ParticipantDAO participantDAO;
@@ -53,10 +51,7 @@ public class ParticipantServiceImpl implements ParticipantService {
         }
 
         // 3. Генерируем токен (UUID)
-        String token = UUID.randomUUID().toString();
-        
-        // 4. Сохраняем сессию
-        SessionManager.getInstance().createParticipantSession(token, participant.id);
+        String token =SessionManager.getInstance().createSession(participant.id);
 
         return new AuthResponseDTO(token);
     }

@@ -10,8 +10,6 @@ import com.grantserver.dto.response.ExpertDTO;
 import com.grantserver.model.Expert;
 import com.grantserver.service.ExpertService;
 
-import java.util.UUID;
-
 public class ExpertServiceImpl implements ExpertService {
 
     private final ExpertDAO expertDAO;
@@ -50,10 +48,7 @@ public class ExpertServiceImpl implements ExpertService {
         }
 
         // Генерируем токен
-        String token = UUID.randomUUID().toString();
-
-        // Сохраняем сессию
-        SessionManager.getInstance().createExpertSession(token, expert.id);
+        String token = SessionManager.getInstance().createSession(expert.id);
 
         return new AuthResponseDTO(token);
     }

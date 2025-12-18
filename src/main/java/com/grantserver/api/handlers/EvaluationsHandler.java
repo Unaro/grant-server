@@ -1,5 +1,11 @@
 package com.grantserver.api.handlers;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 import com.grantserver.common.auth.SessionManager;
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.common.util.JsonUtils;
@@ -9,12 +15,6 @@ import com.grantserver.dto.response.ServerResponseDTO;
 import com.grantserver.service.EvaluationService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 public class EvaluationsHandler implements HttpHandler {
 
@@ -76,7 +76,7 @@ public class EvaluationsHandler implements HttpHandler {
 
         dto.expertId = expertId;
 
-        EvaluationDTO created = evaluationService.addEvaluation(dto);
+        EvaluationDTO created = evaluationService.createEvaluation(dto, expertId);
         sendResponse(exchange, 200, created);
     }
 
@@ -118,7 +118,7 @@ public class EvaluationsHandler implements HttpHandler {
         String token = authHeader.get(0);
         if (token.startsWith("Bearer ")) token = token.substring(7);
 
-        return SessionManager.getInstance().getExpertId(token);
+        return SessionManager.getInstance().getUserId(token);
     }
 
 

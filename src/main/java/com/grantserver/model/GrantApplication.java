@@ -8,7 +8,6 @@ public class GrantApplication {
     public String description;
     public List<String> fields;
     public Integer requestedSum;
-    public Long ownerId; // ID участника, подавшего заявку
     public GrantApplicationStatus status;
 
     public GrantApplication() {}

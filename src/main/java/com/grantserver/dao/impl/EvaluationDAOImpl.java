@@ -1,58 +1,78 @@
 package com.grantserver.dao.impl;
 
-import com.grantserver.common.db.Database;
-import com.grantserver.dao.EvaluationDAO;
-import com.grantserver.model.Evaluation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import com.grantserver.common.db.Database;
+import com.grantserver.dao.EvaluationDAO;
+import com.grantserver.model.Evaluation;
+import com.grantserver.model.Expert;
 
 public class EvaluationDAOImpl implements EvaluationDAO {
 
-    private final Map<Long, Evaluation> table;
+    private final Map<Long, Expert> table;
     private final Database db;
 
     public EvaluationDAOImpl() {
         this.db = Database.getInstance();
-        this.table = db.getEvaluationsTable();
-    }
-
-    @Override
-    public Evaluation save(Evaluation evaluation) {
-        if (evaluation.id == null) {
-            evaluation.id = db.nextEvaluationId();
-        }
-        table.put(evaluation.id, evaluation);
-        return evaluation;
+        this.table = db.getExpertsTable();
     }
 
     @Override
     public Evaluation findById(Long id) {
-        return table.get(id);
+        for (Expert expert : table.values()) {
+            for (Evaluation eval : expert.getEvaluations()) {
+                if (eval.id.equals(id)) {
+                    return eval;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
     public List<Evaluation> findAll() {
-        return new ArrayList<>(table.values());
+        List<Evaluation> all = new ArrayList<>();
+        for (Expert expert : table.values()) {
+            all.addAll(expert.getEvaluations());
+        }
+        return all;
     }
 
     @Override
     public List<Evaluation> findByExpertId(Long expertId) {
-        return table.values().stream()
-                .filter(e -> e.expertId.equals(expertId))
-                .collect(Collectors.toList());
+        Expert expert = table.get(expertId);
+        if (expert != null) {
+            return expert.getEvaluations();
+        }
+        return new ArrayList<>();
     }
 
     @Override
     public List<Evaluation> findByApplicationId(Long applicationId) {
-        return table.values().stream()
-                .filter(e -> e.applicationId.equals(applicationId))
-                .collect(Collectors.toList());
+        List<Evaluation> result = new ArrayList<>();
+        for (Expert expert : table.values()) {
+            for (Evaluation eval : expert.getEvaluations()) {
+                if (eval.application.id.equals(applicationId)) {
+                    result.add(eval);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Long generateId() {
+        return db.nextEvaluationId();
     }
 
     @Override
     public boolean delete(Long id) {
-        return table.remove(id) != null;
+        for (Expert expert : table.values()) {
+            boolean removed = expert.getEvaluations().removeIf(e -> e.id.equals(id));
+            if (removed) return true;
+        }
+        return false;
     }
 }

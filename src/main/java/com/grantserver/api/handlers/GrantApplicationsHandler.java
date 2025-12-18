@@ -1,27 +1,25 @@
 package com.grantserver.api.handlers;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 import com.grantserver.common.auth.SessionManager;
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.common.util.JsonUtils;
 import com.grantserver.dto.request.GrantApplicationCreateDTO;
-import com.grantserver.dto.response.GrantApplicationDTO;
 import com.grantserver.dto.response.ServerResponseDTO;
 import com.grantserver.service.GrantApplicationService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
 public class GrantApplicationsHandler implements HttpHandler {
 
     private final GrantApplicationService grantApplicationService;
+    private final SessionManager sessionManager;
 
     public GrantApplicationsHandler() {
         this.grantApplicationService = ServiceRegistry.getInstance().get(GrantApplicationService.class);
+        this.sessionManager = SessionManager.getInstance();
     }
 
     @Override
@@ -30,86 +28,67 @@ public class GrantApplicationsHandler implements HttpHandler {
         String path = exchange.getRequestURI().getPath();
 
         try {
-            if ("POST".equals(method) && path.endsWith("/api/applications")) {
-                handleCreate(exchange);
-            } else if ("GET".equals(method) && path.endsWith("/api/applications")) {
-                handleList(exchange);
-            } else {
-                sendResponse(exchange, 404, "Endpoint not found");
+            // 1. ИЗВЛЕЧЕНИЕ ТОКЕНА (Для защищенных методов)
+            Long userId = null;
+            if (!"GET".equals(method)) { // Например, GET может быть публичным, но POST требует автора
+                 userId = authenticate(exchange);
+                 if (userId == null) {
+                     sendResponse(exchange, 401, "{\"error\": \"Unauthorized\"}");
+                     return;
+                 }
             }
-        } catch (IOException e) {
+
+            // 2. РОУТИНГ
+            if ("POST".equals(method) && path.equals("/api/applications")) {
+                handleCreate(exchange, userId);
+            } else if ("GET".equals(method) && path.equals("/api/applications")) {
+                handleGetAll(exchange);
+            } else {
+                sendResponse(exchange, 404, "Not Found");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
             sendResponse(exchange, 400, "Error: " + e.getMessage());
         }
     }
 
-    private void handleCreate(HttpExchange exchange) throws IOException {
-        // 1. Авторизация через токен
-        Long ownerId = getUserIdFromToken(exchange);
-        if (ownerId == null) {
-            sendResponse(exchange, 401, "Unauthorized: Missing X-User-Id header");
-            return;
-        }
-
-        // 2. Читаем тело
-        String body = readRequestBody(exchange.getRequestBody());
-        if (body == null || body.trim().isEmpty()) {
-            sendResponse(exchange, 400, "Request body is empty");
-            return;
-        }
-
-        // 3. Парсим DTO
-        GrantApplicationCreateDTO dto = JsonUtils.fromJson(body, GrantApplicationCreateDTO.class);
-        if (dto == null) {
-            sendResponse(exchange, 400, "Invalid JSON");
-            return;
-        }
-
-        // 4. Создаем заявку
-        GrantApplicationDTO created = grantApplicationService.create(dto, ownerId);
-        
-        sendResponse(exchange, 200, created);
-    }
-
-    private void handleList(HttpExchange exchange) throws IOException {
-        List<GrantApplicationDTO> list = grantApplicationService.getAll();
-        sendResponse(exchange, 200, list);
-    }
-
-    // --- Утилиты ---
-
-    private Long getUserIdFromToken(HttpExchange exchange) {
-        // 1. Ищем заголовок Authorization
-        List<String> authHeader = exchange.getRequestHeaders().get("Authorization");
-        
-        if (authHeader == null || authHeader.isEmpty()) {
+    // Хелпер для проверки токена
+    private Long authenticate(HttpExchange exchange) {
+        if (!exchange.getRequestHeaders().containsKey("Authorization")) {
             return null;
         }
-
-        String token = authHeader.get(0); // Ожидаем формат "Bearer <token>" или просто "<token>"
-        
-        // Очистка от префикса Bearer
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
+        String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
+        // Ожидаем формат "Bearer <token>"
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
         }
-
-        // 2. Проверяем токен через SessionManager
-        return SessionManager.getInstance().getParticipantId(token);
+        String token = authHeader.substring(7); // Отрезаем "Bearer "
+        return sessionManager.getUserId(token);
     }
 
-    private void sendResponse(HttpExchange exchange, int statusCode, Object data) throws IOException {
-        ServerResponseDTO responseDTO = new ServerResponseDTO(statusCode, data);
-        String jsonResponse = JsonUtils.toJson(responseDTO);
-        
-        byte[] bytes = jsonResponse.getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
-        exchange.sendResponseHeaders(200, bytes.length);
-        
+    private void handleCreate(HttpExchange exchange, Long userId) throws IOException {
+        String body = new String(exchange.getRequestBody().readAllBytes());
+        GrantApplicationCreateDTO dto = JsonUtils.fromJson(body, GrantApplicationCreateDTO.class);
+
+        // Передаем userId, полученный из токена!
+        var result = grantApplicationService.create(dto, userId);
+
+        String responseJson = JsonUtils.toJson(new ServerResponseDTO(200, result));
+        sendResponse(exchange, 200, responseJson);
+    }
+
+    private void handleGetAll(HttpExchange exchange) throws IOException {
+        var result = grantApplicationService.getAll();
+        String responseJson = JsonUtils.toJson(new ServerResponseDTO(200, result));
+        sendResponse(exchange, 200, responseJson);
+    }
+
+    private void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {
+        exchange.getResponseHeaders().add("Content-Type", "application/json");
+        exchange.sendResponseHeaders(statusCode, response.getBytes().length);
         try (OutputStream os = exchange.getResponseBody()) {
-            os.write(bytes);
+            os.write(response.getBytes());
         }
-    }
-
-    private String readRequestBody(InputStream is) throws IOException {
-        return new String(is.readAllBytes(), StandardCharsets.UTF_8);
     }
 }

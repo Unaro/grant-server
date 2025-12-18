@@ -46,7 +46,7 @@ public class JsonUtils {
                 }
             }
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Ошибка сериализации объекта класса " + clazz.getSimpleName(), e);
         }
 
         json.append("}");

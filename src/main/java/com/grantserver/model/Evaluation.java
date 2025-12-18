@@ -2,9 +2,14 @@ package com.grantserver.model;
 
 public class Evaluation {
     public Long id;
-    public Long applicationId;
-    public Long expertId;
-    public Integer score;
+    public GrantApplication application;
+    public Double score;
 
     public Evaluation() {}
+
+    public Evaluation(Long id, GrantApplication application, Double score) {
+        this.id = id;
+        this.application = application;
+        this.score = score;
+    }
 }

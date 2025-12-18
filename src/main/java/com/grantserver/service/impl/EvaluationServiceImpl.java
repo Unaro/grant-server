@@ -1,5 +1,8 @@
 package com.grantserver.service.impl;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.dao.EvaluationDAO;
 import com.grantserver.dao.ExpertDAO;
@@ -7,10 +10,9 @@ import com.grantserver.dao.GrantApplicationDAO;
 import com.grantserver.dto.request.EvaluationCreateDTO;
 import com.grantserver.dto.response.EvaluationDTO;
 import com.grantserver.model.Evaluation;
+import com.grantserver.model.Expert;
+import com.grantserver.model.GrantApplication;
 import com.grantserver.service.EvaluationService;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class EvaluationServiceImpl implements EvaluationService {
 
@@ -26,43 +28,38 @@ public class EvaluationServiceImpl implements EvaluationService {
     }
 
     @Override
-    public EvaluationDTO addEvaluation(EvaluationCreateDTO dto) {
-        // 1. Валидация существования эксперта и заявки
-        if (expertDAO.findById(dto.expertId) == null) {
-            throw new RuntimeException("Expert not found: " + dto.expertId);
-        }
-        if (grantApplicationDAO.findById(dto.applicationId) == null) {
-            throw new RuntimeException("Application not found: " + dto.applicationId);
-        }
+    public EvaluationDTO createEvaluation(EvaluationCreateDTO dto, Long expertId) {
+        Expert expert = expertDAO.findById(expertId);
+        
+        GrantApplication application = grantApplicationDAO.findById(dto.applicationId);
 
-        // 2. Создание оценки
         Evaluation evaluation = new Evaluation();
-        evaluation.expertId = dto.expertId;
-        evaluation.applicationId = dto.applicationId;
+
+        evaluation.id = evaluationDAO.generateId(); 
+        evaluation.application = application;
         evaluation.score = dto.score;
 
-        Evaluation saved = evaluationDAO.save(evaluation);
-        return new EvaluationDTO(saved);
-    }
+        expert.addEvaluation(evaluation);
 
+        return new EvaluationDTO(evaluation);
+    }
+    
     @Override
     public EvaluationDTO updateEvaluation(Long id, EvaluationCreateDTO dto) {
         Evaluation existing = evaluationDAO.findById(id);
         if (existing == null) {
-            throw new RuntimeException("Evaluation not found");
+            throw new RuntimeException("Оценка не найдена");
         }
         
-        // Обновляем поля (оценку)
         existing.score = dto.score;
- 
-        Evaluation saved = evaluationDAO.save(existing);
-        return new EvaluationDTO(saved);
+
+        return new EvaluationDTO(existing);
     }
 
     @Override
     public void deleteEvaluation(Long id) {
         if (!evaluationDAO.delete(id)) {
-            throw new RuntimeException("Evaluation not found for deletion");
+            throw new RuntimeException("Оценка не найдена для удаления");
         }
     }
 
