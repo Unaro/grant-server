@@ -16,13 +16,13 @@ public class GrantApplicationDTO {
     public GrantApplicationDTO() {}
 
     // Конструктор для конвертации из Entity
-    public GrantApplicationDTO(GrantApplication app, Long ownerId) {
+    public GrantApplicationDTO(GrantApplication app) {
         this.id = app.id;
         this.title = app.title;
         this.description = app.description;
         this.fields = app.fields;
         this.requestedSum = app.requestedSum;
-        this.ownerId = ownerId;
+        this.ownerId = app.owner.id;
         this.status = app.status != null ? app.status.name() : null;
     }
 }

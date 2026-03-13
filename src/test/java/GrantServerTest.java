@@ -48,7 +48,7 @@ public class GrantServerTest {
     @Order(1)
     @DisplayName("1. Health Check - Сервер жив")
     public void testHealthCheck() throws Exception {
-        HttpResponse<String> response = sendGet("/health", null);
+        HttpResponse<String> response = sendGet("/health");
         assertEquals(200, response.statusCode());
         assertTrue(response.body().contains("OK"));
     }
@@ -238,6 +238,14 @@ public class GrantServerTest {
         if (token != null) builder.header("Authorization", "Bearer " + token);
         return client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
     }
+
+    private HttpResponse<String> sendGet(String path) throws Exception {
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + path))
+                .GET();
+        return client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+    }
+
 
     private HttpResponse<String> sendPost(String path, String json, String token) throws Exception {
         HttpRequest.Builder builder = HttpRequest.newBuilder()

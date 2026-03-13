@@ -19,6 +19,7 @@ public class Participant extends User {
 
     public void addApplication(GrantApplication application) {
         this.applications.add(application);
+        application.owner = this; 
     }
 
     public void removeApplication(Long applicationId) {

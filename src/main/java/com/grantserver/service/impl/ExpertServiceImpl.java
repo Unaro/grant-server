@@ -3,10 +3,6 @@ package com.grantserver.service.impl;
 import com.grantserver.common.auth.SessionManager;
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.dao.ExpertDAO;
-import com.grantserver.dto.request.AuthRequestDTO;
-import com.grantserver.dto.request.ExpertRegisterDTO;
-import com.grantserver.dto.response.AuthResponseDTO;
-import com.grantserver.dto.response.ExpertDTO;
 import com.grantserver.model.Expert;
 import com.grantserver.service.ExpertService;
 
@@ -19,40 +15,33 @@ public class ExpertServiceImpl implements ExpertService {
     }
 
     @Override
-    public ExpertDTO register(ExpertRegisterDTO dto) {
-        if (expertDAO.findByLogin(dto.login) != null) {
-            throw new RuntimeException("Login '" + dto.login + "' is already taken.");
+    public Expert register(Expert expert) {
+        if (expertDAO.findByLogin(expert.login) != null) {
+            throw new RuntimeException("Login '" + expert.login + "' is already taken.");
         }
-
-        Expert expert = new Expert();
-        expert.firstName = dto.firstName;
-        expert.lastName = dto.lastName;
-        expert.fields = dto.fields;
-        expert.login = dto.login;
-        expert.password = dto.password;
 
         Expert saved = expertDAO.save(expert);
 
-        return new ExpertDTO(saved);
+        return saved;
     }
 
     @Override
-    public AuthResponseDTO login(AuthRequestDTO dto) {
-        Expert expert = expertDAO.findByLogin(dto.login);
+    public String login(String login, String password) {
+        Expert expert = expertDAO.findByLogin(login);
 
-        if (expert == null || !expert.password.equals(dto.password)) {
+        if (expert == null || !expert.password.equals(password)) {
             throw new RuntimeException("Invalid login or password");
         }
 
         String token = SessionManager.getInstance().createSession(expert.id);
 
-        return new AuthResponseDTO(token);
+        return token;
     }
 
     @Override
-    public ExpertDTO getById(Long id) {
+    public Expert getById(Long id) {
         Expert expert = expertDAO.findById(id);
         if (expert == null) return null;
-        return new ExpertDTO(expert);
+        return expert;
     }
 }

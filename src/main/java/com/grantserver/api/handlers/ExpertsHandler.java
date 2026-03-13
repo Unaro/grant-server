@@ -1,5 +1,10 @@
 package com.grantserver.api.handlers;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.common.util.JsonUtils;
 import com.grantserver.dto.request.AuthRequestDTO;
@@ -7,14 +12,10 @@ import com.grantserver.dto.request.ExpertRegisterDTO;
 import com.grantserver.dto.response.AuthResponseDTO;
 import com.grantserver.dto.response.ExpertDTO;
 import com.grantserver.dto.response.ServerResponseDTO;
+import com.grantserver.model.Expert;
 import com.grantserver.service.ExpertService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 
 public class ExpertsHandler implements HttpHandler {
 
@@ -58,7 +59,7 @@ public class ExpertsHandler implements HttpHandler {
             return;
         }
 
-        ExpertDTO created = expertService.register(dto);
+        ExpertDTO created = new ExpertDTO(expertService.register(new Expert(dto.login, dto.password, dto.firstName, dto.lastName)));
         sendResponse(exchange, 200, created);
     }
 
@@ -77,7 +78,7 @@ public class ExpertsHandler implements HttpHandler {
             return;
         }
 
-        AuthResponseDTO response = expertService.login(dto);
+        AuthResponseDTO response = new AuthResponseDTO(expertService.login(dto.login, dto.password));
         sendResponse(exchange, 200, response);
     }
 

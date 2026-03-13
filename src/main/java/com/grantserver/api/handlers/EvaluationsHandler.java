@@ -76,7 +76,7 @@ public class EvaluationsHandler implements HttpHandler {
 
         dto.expertId = expertId;
 
-        EvaluationDTO created = evaluationService.createEvaluation(dto, expertId);
+        EvaluationDTO created = new EvaluationDTO(evaluationService.createEvaluation(dto.expertId, dto.applicationId, dto.score));
         sendResponse(exchange, 200, created);
     }
 
@@ -92,14 +92,13 @@ public class EvaluationsHandler implements HttpHandler {
         String body = readRequestBody(exchange.getRequestBody());
         EvaluationCreateDTO dto = JsonUtils.fromJson(body, EvaluationCreateDTO.class);
         
-        dto.expertId = expertId;
+        dto.expertId = id;
 
-        EvaluationDTO updated = evaluationService.updateEvaluation(id, dto);
+        EvaluationDTO updated = new EvaluationDTO(evaluationService.updateEvaluation(dto.expertId, dto.score));
         sendResponse(exchange, 200, updated);
     }
 
     private void handleDelete(HttpExchange exchange, Long id) throws IOException {
-        // 1. Проверка на авторизацию
         if (getExpertIdFromToken(exchange) == null) {
             sendResponse(exchange, 401, "Unauthorized");
             return;
@@ -124,7 +123,6 @@ public class EvaluationsHandler implements HttpHandler {
 
     private Long extractIdFromPath(String path) {
         try {
-            // Берем всё, что после последнего слеша
             String idPart = path.substring(path.lastIndexOf('/') + 1);
             return Long.valueOf(idPart);
         } catch (NumberFormatException e) {

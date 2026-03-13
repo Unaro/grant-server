@@ -2,12 +2,16 @@ package com.grantserver.api.handlers;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.grantserver.common.auth.SessionManager;
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.common.util.JsonUtils;
 import com.grantserver.dto.request.GrantApplicationCreateDTO;
+import com.grantserver.dto.response.GrantApplicationDTO;
 import com.grantserver.dto.response.ServerResponseDTO;
+import com.grantserver.model.GrantApplication;
 import com.grantserver.service.GrantApplicationService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -71,16 +75,33 @@ public class GrantApplicationsHandler implements HttpHandler {
         String body = new String(exchange.getRequestBody().readAllBytes());
         GrantApplicationCreateDTO dto = JsonUtils.fromJson(body, GrantApplicationCreateDTO.class);
 
-        // Передаем userId, полученный из токена!
-        var result = grantApplicationService.create(dto, userId);
 
-        String responseJson = JsonUtils.toJson(new ServerResponseDTO(200, result));
+        GrantApplication appEntity = new GrantApplication();
+        appEntity.title = dto.title;
+        appEntity.description = dto.description;
+        appEntity.fields = dto.fields;
+        appEntity.requestedSum = dto.requestedSum;
+
+
+        GrantApplication createdApp = grantApplicationService.create(appEntity, userId);
+
+        GrantApplicationDTO responseDto = new GrantApplicationDTO(createdApp);
+
+
+        String responseJson = JsonUtils.toJson(new ServerResponseDTO(200, responseDto));
         sendResponse(exchange, 200, responseJson);
     }
-
+    
     private void handleGetAll(HttpExchange exchange) throws IOException {
-        var result = grantApplicationService.getAll();
-        String responseJson = JsonUtils.toJson(new ServerResponseDTO(200, result));
+        List<GrantApplication> entities = grantApplicationService.getAll();
+
+        List<GrantApplicationDTO> dtos = entities.stream()
+            .map(app -> {
+                return new GrantApplicationDTO(app); 
+            })
+            .collect(Collectors.toList());
+
+        String responseJson = JsonUtils.toJson(new ServerResponseDTO(200, dtos));
         sendResponse(exchange, 200, responseJson);
     }
 

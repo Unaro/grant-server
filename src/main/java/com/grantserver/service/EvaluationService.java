@@ -2,12 +2,13 @@ package com.grantserver.service;
 
 import java.util.List;
 
-import com.grantserver.dto.request.EvaluationCreateDTO;
-import com.grantserver.dto.response.EvaluationDTO;
+import com.grantserver.model.Evaluation;
 
 public interface EvaluationService {
-    EvaluationDTO updateEvaluation(Long id, EvaluationCreateDTO dto);
+    Evaluation updateEvaluation(Long id, Double score);
+    
     void deleteEvaluation(Long id);
-    List<EvaluationDTO> getByExpert(Long expertId);
-    EvaluationDTO createEvaluation(EvaluationCreateDTO dto, Long expertId);
+    
+    List<Evaluation> getByExpert(Long expertId);
+    Evaluation createEvaluation(Long expertId, Long applicationId, Double score);
 }

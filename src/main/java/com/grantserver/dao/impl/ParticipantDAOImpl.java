@@ -1,15 +1,15 @@
 package com.grantserver.dao.impl;
 
-import com.grantserver.common.db.Database;
-import com.grantserver.dao.ParticipantDAO;
-import com.grantserver.model.Participant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.grantserver.common.db.Database;
+import com.grantserver.dao.ParticipantDAO;
+import com.grantserver.model.Participant;
+
 public class ParticipantDAOImpl implements ParticipantDAO {
     
-    // Ссылка на "таблицу" в базе данных
     private final Map<Long, Participant> table;
     private final Database db;
 
@@ -21,7 +21,6 @@ public class ParticipantDAOImpl implements ParticipantDAO {
     @Override
     public Participant save(Participant participant) {
         if (participant.id == null) {
-            // Запрашиваем новый ID у базы (аналог sequence)
             participant.id = db.nextParticipantId();
         }
         table.put(participant.id, participant);
@@ -35,7 +34,6 @@ public class ParticipantDAOImpl implements ParticipantDAO {
 
     @Override
     public Participant findByLogin(String login) {
-        // SELECT * FROM participants WHERE login = ?
         return table.values().stream()
                 .filter(p -> p.login.equals(login))
                 .findFirst()

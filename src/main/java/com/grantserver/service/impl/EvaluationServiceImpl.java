@@ -7,8 +7,6 @@ import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.dao.EvaluationDAO;
 import com.grantserver.dao.ExpertDAO;
 import com.grantserver.dao.GrantApplicationDAO;
-import com.grantserver.dto.request.EvaluationCreateDTO;
-import com.grantserver.dto.response.EvaluationDTO;
 import com.grantserver.model.Evaluation;
 import com.grantserver.model.Expert;
 import com.grantserver.model.GrantApplication;
@@ -28,32 +26,32 @@ public class EvaluationServiceImpl implements EvaluationService {
     }
 
     @Override
-    public EvaluationDTO createEvaluation(EvaluationCreateDTO dto, Long expertId) {
+    public Evaluation createEvaluation(Long expertId, Long applicationId, Double score) {
         Expert expert = expertDAO.findById(expertId);
         
-        GrantApplication application = grantApplicationDAO.findById(dto.applicationId);
+        GrantApplication application = grantApplicationDAO.findById(applicationId);
 
         Evaluation evaluation = new Evaluation();
 
         evaluation.id = evaluationDAO.generateId(); 
         evaluation.application = application;
-        evaluation.score = dto.score;
+        evaluation.score = score;
 
         expert.addEvaluation(evaluation);
 
-        return new EvaluationDTO(evaluation);
+        return evaluation;
     }
     
     @Override
-    public EvaluationDTO updateEvaluation(Long id, EvaluationCreateDTO dto) {
+    public Evaluation updateEvaluation(Long id, Double score) {
         Evaluation existing = evaluationDAO.findById(id);
         if (existing == null) {
             throw new RuntimeException("Evaluation not found");
         }
         
-        existing.score = dto.score;
+        existing.score = score;
 
-        return new EvaluationDTO(existing);
+        return existing;
     }
 
     @Override
@@ -64,9 +62,8 @@ public class EvaluationServiceImpl implements EvaluationService {
     }
 
     @Override
-    public List<EvaluationDTO> getByExpert(Long expertId) {
+    public List<Evaluation> getByExpert(Long expertId) {
         return evaluationDAO.findByExpertId(expertId).stream()
-                .map(EvaluationDTO::new)
                 .collect(Collectors.toList());
     }
 }

@@ -10,5 +10,7 @@ public class GrantApplication {
     public Integer requestedSum;
     public GrantApplicationStatus status;
 
+    public Participant owner;
+
     public GrantApplication() {}
 }

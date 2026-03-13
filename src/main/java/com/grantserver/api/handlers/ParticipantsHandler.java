@@ -8,7 +8,9 @@ import com.grantserver.common.util.JsonUtils;
 import com.grantserver.dto.request.AuthRequestDTO;
 import com.grantserver.dto.request.ParticipantRegisterDTO;
 import com.grantserver.dto.response.AuthResponseDTO;
+import com.grantserver.dto.response.ParticipantDTO;
 import com.grantserver.dto.response.ServerResponseDTO;
+import com.grantserver.model.Participant;
 import com.grantserver.service.ParticipantService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -44,7 +46,11 @@ public class ParticipantsHandler implements HttpHandler {
         String body = new String(exchange.getRequestBody().readAllBytes());
         ParticipantRegisterDTO dto = JsonUtils.fromJson(body, ParticipantRegisterDTO.class);
 
-        var result = participantService.register(dto);
+        Participant participant = new Participant();
+        participant.login = dto.login;
+        participant.password = dto.password;
+
+        ParticipantDTO result = new ParticipantDTO(participantService.register(participant));
         
         String responseJson = JsonUtils.toJson(new ServerResponseDTO(200, result));
         sendResponse(exchange, 200, responseJson);
@@ -54,7 +60,7 @@ public class ParticipantsHandler implements HttpHandler {
         String body = new String(exchange.getRequestBody().readAllBytes());
         AuthRequestDTO dto = JsonUtils.fromJson(body, AuthRequestDTO.class);
 
-        AuthResponseDTO tokenDto = participantService.login(dto);
+        AuthResponseDTO tokenDto = new AuthResponseDTO(participantService.login(dto.login, dto.password));
 
         String responseJson = JsonUtils.toJson(new ServerResponseDTO(200, tokenDto));
         sendResponse(exchange, 200, responseJson);

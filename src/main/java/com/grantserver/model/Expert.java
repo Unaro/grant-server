@@ -6,7 +6,7 @@ import java.util.List;
 public class Expert extends User {
     public String firstName;
     public String lastName;
-    public List<String> fields; // Компетенции
+    public List<String> fields;
 
     private final List<Evaluation> evaluations = new ArrayList<>();
 
@@ -24,8 +24,8 @@ public class Expert extends User {
 
     public void addEvaluation(Evaluation evaluation) {
         this.evaluations.add(evaluation);
+        evaluation.expert = this;
     }
-    
 
     public void removeEvaluation(Long evaluationId) {
         this.evaluations.removeIf(e -> e.id.equals(evaluationId));

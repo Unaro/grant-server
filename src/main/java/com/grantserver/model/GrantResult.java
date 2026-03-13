@@ -1,27 +1,25 @@
-package com.grantserver.dto.response;
+package com.grantserver.model;
 
 import java.util.List;
 
-import com.grantserver.model.GrantApplication;
-
-public class GrantResultDTO {
-    public List<WinnerDTO> winners;
+public class GrantResult {
+    public List<Winner> winners;
     public Integer remainingFund;
 
-    public GrantResultDTO() {}
+    public GrantResult() {}
 
-    public GrantResultDTO(List<WinnerDTO> winners, Integer remainingFund) {
+    public GrantResult(List<Winner> winners, Integer remainingFund) {
         this.winners = winners;
         this.remainingFund = remainingFund;
     }
 
-    public static class WinnerDTO {
+    public static class Winner {
         public Long applicationId;
         public String title;
         public Double averageScore;
         public Integer givenAmount;
 
-        public WinnerDTO(GrantApplication app, Double avg, Integer amount) {
+        public Winner(GrantApplication app, Double avg, Integer amount) {
             this.applicationId = app.id;
             this.title = app.title;
             this.averageScore = avg;

@@ -1,12 +1,11 @@
 package com.grantserver.service;
 
-import com.grantserver.dto.request.AuthRequestDTO;
-import com.grantserver.dto.request.ExpertRegisterDTO;
-import com.grantserver.dto.response.AuthResponseDTO;
-import com.grantserver.dto.response.ExpertDTO;
+import com.grantserver.model.Expert;
 
 public interface ExpertService {
-    ExpertDTO register(ExpertRegisterDTO registerDTO);
-    AuthResponseDTO login(AuthRequestDTO authDTO);
-    ExpertDTO getById(Long id);
+    Expert register(Expert expert);
+    
+    String login(String login, String password);
+    
+    Expert getById(Long id);
 }

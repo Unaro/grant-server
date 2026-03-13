@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.dao.EvaluationDAO;
 import com.grantserver.dao.GrantApplicationDAO;
-import com.grantserver.dto.request.GrantFundRequestDTO;
 import com.grantserver.dto.response.GrantResultDTO;
 import com.grantserver.model.Evaluation;
 import com.grantserver.model.GrantApplication;
@@ -30,7 +29,7 @@ public class GrantFundServiceImpl implements GrantFundService {
     }
 
     @Override
-    public GrantResultDTO calculate(GrantFundRequestDTO request) {
+    public GrantResultDTO calculate(Integer fund, Double threshold) {
         List<GrantApplication> allApps = applicationDAO.findAll().stream()
                 .filter(app -> app.status == GrantApplicationStatus.ACTIVE)
                 .collect(Collectors.toList());
@@ -45,7 +44,7 @@ public class GrantFundServiceImpl implements GrantFundService {
                 avg = sum / evals.size();
             }
 
-            if (avg >= request.threshold) {
+            if (avg >= threshold) {
                 scoredApps.add(new RankingStrategy.ScoredApplication(app, avg));
             }
         }
@@ -53,7 +52,7 @@ public class GrantFundServiceImpl implements GrantFundService {
         scoredApps.sort(rankingStrategy::compare);
 
         List<GrantResultDTO.WinnerDTO> winners = new ArrayList<>();
-        int currentFund = request.fund;
+        int currentFund = fund;
 
         for (RankingStrategy.ScoredApplication sa : scoredApps) {
             int requested = sa.application.requestedSum;

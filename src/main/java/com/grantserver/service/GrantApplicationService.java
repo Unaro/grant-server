@@ -1,11 +1,11 @@
 package com.grantserver.service;
 
-import com.grantserver.dto.request.GrantApplicationCreateDTO;
-import com.grantserver.dto.response.GrantApplicationDTO;
 import java.util.List;
 
+import com.grantserver.model.GrantApplication;
+
 public interface GrantApplicationService {
-    GrantApplicationDTO create(GrantApplicationCreateDTO dto, Long ownerId);
-    List<GrantApplicationDTO> getAll();
-    List<GrantApplicationDTO> getByOwner(Long ownerId);
+    GrantApplication create(GrantApplication app, Long ownerId);
+    List<GrantApplication> getAll();
+    List<GrantApplication> getByOwner(Long ownerId);
 }

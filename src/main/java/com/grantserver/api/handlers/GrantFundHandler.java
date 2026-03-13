@@ -1,5 +1,10 @@
 package com.grantserver.api.handlers;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.common.util.JsonUtils;
 import com.grantserver.dto.request.GrantFundRequestDTO;
@@ -8,11 +13,6 @@ import com.grantserver.dto.response.ServerResponseDTO;
 import com.grantserver.service.GrantFundService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 
 public class GrantFundHandler implements HttpHandler {
 
@@ -50,7 +50,7 @@ public class GrantFundHandler implements HttpHandler {
             return;
         }
 
-        GrantResultDTO result = grantFundService.calculate(dto);
+        GrantResultDTO result = grantFundService.calculate(dto.fund, dto.threshold);
         
         sendResponse(exchange, 200, result);
     }

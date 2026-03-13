@@ -1,12 +1,9 @@
 package com.grantserver.service;
 
-import com.grantserver.dto.request.AuthRequestDTO;
-import com.grantserver.dto.request.ParticipantRegisterDTO;
-import com.grantserver.dto.response.AuthResponseDTO;
-import com.grantserver.dto.response.ParticipantDTO;
+import com.grantserver.model.Participant;
 
 public interface ParticipantService {
-    ParticipantDTO register(ParticipantRegisterDTO registerDTO);
+    Participant register(Participant participant);
     
-    AuthResponseDTO login(AuthRequestDTO authDTO);
+    String login(String login, String password);
 }

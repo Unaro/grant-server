@@ -1,13 +1,11 @@
 package com.grantserver.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.grantserver.common.config.ServiceRegistry;
 import com.grantserver.dao.GrantApplicationDAO;
 import com.grantserver.dao.ParticipantDAO;
-import com.grantserver.dto.request.GrantApplicationCreateDTO;
-import com.grantserver.dto.response.GrantApplicationDTO;
 import com.grantserver.model.GrantApplication;
 import com.grantserver.model.GrantApplicationStatus;
 import com.grantserver.model.Participant;
@@ -24,36 +22,35 @@ public class GrantApplicationServiceImpl implements GrantApplicationService {
     }
 
     @Override
-    public GrantApplicationDTO create(GrantApplicationCreateDTO dto, Long ownerId) {
-        GrantApplication app = new GrantApplication();
-        app.title = dto.title;
-        app.description = dto.description;
-        app.fields = dto.fields;
-        app.requestedSum = dto.requestedSum;
+    public GrantApplication create(GrantApplication app, Long ownerId) {
+        if (app.requestedSum <= 0) {
+            throw new IllegalArgumentException("Сумма должна быть больше нуля");
+        }
+
+        Participant owner = participantDAO.findById(ownerId);
+        if (owner == null) throw new IllegalArgumentException("Участник не найден");
+
         app.status = GrantApplicationStatus.ACTIVE;
+        app.id = grantApplicationDAO.generateId();
 
-        Participant participant = participantDAO.findById(ownerId);
-        if (participant == null) throw new IllegalArgumentException("Participant not found");
+        owner.addApplication(app);
 
-        app.id = grantApplicationDAO.generateId(); 
-
-        participant.addApplication(app);
-
-        return new GrantApplicationDTO(app, ownerId);
+        return app;
     }
 
     @Override
-    public List<GrantApplicationDTO> getAll() {
-        return participantDAO.findAll().stream()
-                .flatMap(participant -> participant.getApplications().stream()
-                        .map(app -> new GrantApplicationDTO(app, participant.id)))
-                .collect(Collectors.toList());
+    public List<GrantApplication> getAll() {
+        List<GrantApplication> allApps = new ArrayList<>();
+        for (Participant p : participantDAO.findAll()) {
+            allApps.addAll(p.getApplications());
+        }
+        return allApps;
     }
 
     @Override
-    public List<GrantApplicationDTO> getByOwner(Long ownerId) {
-        return grantApplicationDAO.findAllByOwnerId(ownerId).stream()
-                .map(app -> new GrantApplicationDTO(app, ownerId))
-                .collect(Collectors.toList());
+    public List<GrantApplication> getByOwner(Long ownerId) {
+        Participant p = participantDAO.findById(ownerId);
+        if (p == null) return new ArrayList<>();
+        return p.getApplications();
     }
 }
