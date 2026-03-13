@@ -1,0 +1,15 @@
+# Compiled class files
+target/
+
+# IDE files
+.idea/
+*.iml
+.vscode/settings.json
+
+# Build artifacts
+*.class
+*.jar
+*.war
+
+# Logs
+*.log
